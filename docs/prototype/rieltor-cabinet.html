@@ -1,0 +1,774 @@
+<title>Кабінет ріелтора</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sidebar + work area; dense data UI. Palette: green-grey ground, ink-teal accent, semantic status colors kept apart from the accent. */
+:root{
+  --bg:#F2F4F3; --surface:#FFFFFF; --surface2:#E9EEEC; --ink:#14201D; --ink2:#51605C; --line:#D5DDDA;
+  --accent:#0B5D4E; --accent-ink:#FFFFFF; --accent-soft:#D6EBE5;
+  --ok:#1B7F45; --ok-soft:#DDF0E4; --warn:#8F5A00; --warn-soft:#FBEBC8; --bad:#B3392F; --bad-soft:#F7DCD8;
+  --info:#2D5E9E; --info-soft:#DCE8F6; --mute:#5F6C68; --mute-soft:#E4E8E7;
+  --shadow:0 1px 2px rgba(20,32,29,.08),0 8px 24px rgba(20,32,29,.07);
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif; --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F1715; --surface:#17211E; --surface2:#1E2B27; --ink:#E6EEEB; --ink2:#9AAAA5; --line:#2C3B36;
+  --accent:#4FC3A5; --accent-ink:#06251D; --accent-soft:#1C3A33;
+  --ok:#5CCB8A; --ok-soft:#173324; --warn:#E0AE4D; --warn-soft:#3A2D10; --bad:#F07A6E; --bad-soft:#3F1D1A;
+  --info:#7FB0EA; --info-soft:#1B2D45; --mute:#8E9C97; --mute-soft:#232F2B; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1715; --surface:#17211E; --surface2:#1E2B27; --ink:#E6EEEB; --ink2:#9AAAA5; --line:#2C3B36;
+  --accent:#4FC3A5; --accent-ink:#06251D; --accent-soft:#1C3A33;
+  --ok:#5CCB8A; --ok-soft:#173324; --warn:#E0AE4D; --warn-soft:#3A2D10; --bad:#F07A6E; --bad-soft:#3F1D1A;
+  --info:#7FB0EA; --info-soft:#1B2D45; --mute:#8E9C97; --mute-soft:#232F2B; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35); color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{margin:0;font-weight:600;text-wrap:balance}
+h1{font-size:22px;letter-spacing:-.01em} h2{font-size:15px} h3{font-size:13px;color:var(--ink2);text-transform:uppercase;letter-spacing:.06em;font-weight:500}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--ink2)} .small{font-size:12px}
+.shell{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100%}
+.side{background:var(--surface);border-right:1px solid var(--line);padding:16px 12px;display:flex;flex-direction:column;gap:14px;position:sticky;top:0;height:100vh;overflow:auto}
+.brand{display:flex;align-items:center;gap:10px;padding:2px 8px 6px}
+.brand b{font-size:15px;letter-spacing:-.01em} .logo{width:28px;height:28px;border-radius:7px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-family:var(--mono);font-weight:500;font-size:13px}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav button{display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;border:0;background:none;padding:8px 10px;border-radius:7px;cursor:pointer;color:var(--ink2)}
+.nav button:hover{background:var(--surface2);color:var(--ink)}
+.nav button.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.nav .sec{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--mute);padding:10px 10px 4px}
+.cnt{font-family:var(--mono);font-size:11px;background:var(--bad-soft);color:var(--bad);border-radius:99px;padding:0 6px}
+.who{border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px;background:var(--bg)}
+.who label{font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.06em}
+select,input[type=text],input[type=number],input[type=date],input[type=search],textarea{background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:7px 9px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:64px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.demo{border:1px dashed var(--line);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:6px}
+.main{padding:22px 28px 60px;min-width:0;max-width:1240px}
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.top p{margin:4px 0 0;color:var(--ink2);max-width:70ch}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))} .g3{grid-template-columns:repeat(3,minmax(0,1fr))} .g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.g21{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.card.flat{box-shadow:none} .card.pop{box-shadow:var(--shadow)}
+.card header{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+.kpi{display:flex;flex-direction:column;gap:2px} .kpi b{font-size:26px;letter-spacing:-.02em;font-variant-numeric:tabular-nums} .kpi span{color:var(--ink2);font-size:12px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:500;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{background:var(--surface2)} .btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)} .btn.pri:hover{filter:brightness(1.08)}
+.btn.sm{padding:4px 9px;font-size:12px;border-radius:6px} .btn.bad{color:var(--bad);border-color:var(--bad)} .btn[disabled]{opacity:.45;cursor:not-allowed}
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:99px;padding:1px 9px;font-size:12px;font-weight:500;white-space:nowrap;background:var(--mute-soft);color:var(--mute)}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.warn{background:var(--warn-soft);color:var(--warn)} .pill.bad{background:var(--bad-soft);color:var(--bad)} .pill.info{background:var(--info-soft);color:var(--info)}
+.pill.plain::before{display:none}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);font-weight:500;text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tr.click{cursor:pointer} .tbl tr.click:hover td{background:var(--surface2)}
+.tbl tr:last-child td{border-bottom:0}
+.scroll{overflow-x:auto}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:14px;overflow-x:auto}
+.tabs button{border:0;background:none;padding:9px 14px;cursor:pointer;color:var(--ink2);border-bottom:2px solid transparent;white-space:nowrap}
+.tabs button.on{color:var(--accent);border-color:var(--accent);font-weight:600}
+.list{display:flex;flex-direction:column}
+.item{display:flex;gap:12px;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:0} .item>div{min-width:0}
+.alert{border:1px solid var(--bad);background:var(--bad-soft);border-radius:10px;padding:12px;display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.alert.info{border-color:var(--info);background:var(--info-soft)}
+.note{border-left:3px solid var(--accent);background:var(--accent-soft);padding:8px 12px;border-radius:0 8px 8px 0;font-size:13px}
+.note.warn{border-color:var(--warn);background:var(--warn-soft)}
+.bar{height:6px;border-radius:99px;background:var(--mute-soft);overflow:hidden} .bar i{display:block;height:100%;background:var(--accent)}
+.parts{display:grid;grid-template-columns:auto 1fr auto;gap:4px 10px;align-items:center;font-size:12px}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0} .field label{font-size:12px;color:var(--ink2)}
+.timeline{display:flex;flex-direction:column;gap:0}
+.tl{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;padding:8px 0}
+.tl .dot{width:24px;height:24px;border-radius:50%;background:var(--surface2);display:grid;place-items:center;font-size:11px;font-family:var(--mono);color:var(--ink2)}
+.spark{display:flex;align-items:flex-end;gap:3px;height:36px}.spark i{flex:1;background:var(--accent);opacity:.75;border-radius:2px 2px 0 0;min-width:4px}
+.overlay{position:fixed;inset:0;background:rgba(10,18,16,.55);display:grid;place-items:center;padding:16px;z-index:50;overflow:auto}
+.modal{background:var(--surface);border-radius:14px;width:min(640px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px}
+.modal.wide{width:min(860px,100%)}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;z-index:80;max-width:90vw;box-shadow:var(--shadow)}
+.spin{width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp .8s linear infinite;display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+.phone{width:min(360px,100%);margin:0 auto;border:10px solid #1b2623;border-radius:34px;background:#f6f8f7;color:#14201d;overflow:hidden;box-shadow:var(--shadow)}
+.phone .scr{padding:16px;display:flex;flex-direction:column;gap:12px;max-height:620px;overflow:auto}
+.phone .lot{background:#fff;border:1px solid #d5ddda;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.phone .btn{background:#fff;color:#14201d;border-color:#c5d0cc} .phone .btn.on{background:#0B5D4E;color:#fff;border-color:#0B5D4E}
+.phone .muted{color:#51605c}
+.stagebar{display:flex;gap:4px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);border-radius:99px;padding:3px 11px;cursor:pointer;background:var(--surface);font-size:12px}
+.chip.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.sticky-note{font-size:12px;color:var(--mute)}
+details summary{cursor:pointer;color:var(--ink2)}
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr}
+  .side{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:12px 16px}
+  .nav{flex-direction:row;overflow-x:auto;gap:4px} .nav .sec{display:none} .nav button{white-space:nowrap}
+  .main{padding:16px}
+  .g2,.g3,.g4,.g21{grid-template-columns:minmax(0,1fr)}
+  .demo{display:none}
+}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+</style>
+
+<div id="app"></div>
+<div id="toast"></div>
+
+<script>
+/* ============ ДАНІ-ЗАГЛУШКИ (приклад, не реальні клієнти) ============ */
+const NOW = new Date('2026-10-15T10:30:00');
+const USERS = [
+  {id:'u0',name:'Andrzej Nowak',role:'owner',active:true,tg:true},
+  {id:'u1',name:'Marta Kowalska',role:'realtor',active:true,tg:true},
+  {id:'u2',name:'Oleh Bondar',role:'realtor',active:true,tg:true},
+  {id:'u3',name:'Iryna Wójcik',role:'realtor',active:true,tg:false},
+  {id:'u9',name:'Tech Admin',role:'admin',active:true,tg:true}
+];
+const DEV = {ataner:{n:'Ataner',partner:true,pct:2.5},nickel:{n:'Nickel Development',partner:true,pct:3},jakon:{n:'Jakon',partner:false,pct:0},agg:{n:'Агрегатор',partner:false,pct:0}};
+const INV = {
+  sw13:{n:'Świerzawska 13',dist:'Śródmieście',dev:'ataner',city:'Wrocław',kind:'Новобудова'},
+  pk18:{n:'Piekary 18',dist:'Stare Miasto',dev:'ataner',city:'Wrocław',kind:'Новобудова'},
+  wz2:{n:'Warzelnia II',dist:'Kobylepole',dev:'nickel',city:'Poznań',kind:'Новобудова'},
+  nat2:{n:'Naturama II',dist:'Strzeszyn',dev:'nickel',city:'Poznań',kind:'Новобудова'},
+  dab:{n:'Dąbrówki (domy)',dist:'Dąbrówka',dev:'nickel',city:'Poznań',kind:'Будинки'},
+  wi2:{n:'Wieruszowska 2',dist:'Junikowo',dev:'jakon',city:'Poznań',kind:'Новобудова'}
+};
+const SRC0 = [
+  {id:'s1',inv:'sw13',type:'developer_site',url:'ataner.pl/pl/swierzawska-13-wyszukiwarka',trust:'висока',state:'ok',last:270,v:3,runs:[30,30,30,29,29,28,28,28,27,27]},
+  {id:'s2',inv:'pk18',type:'developer_site',url:'ataner.pl/pl/piekary-18-…',trust:'висока',state:'paused',last:4320,v:1,runs:[2,2,2,2,0,0,0,0,0,0],note:'Сторінку пошуку не знайдено (404). Потрібен новий URL.'},
+  {id:'s3',inv:'wz2',type:'developer_site',url:'nickel.com.pl/pl/wyszukiwarka-mieszkan',trust:'висока',state:'ok',last:270,v:2,runs:[53,53,52,52,51,51,50,50,50,49]},
+  {id:'s4',inv:'nat2',type:'developer_site',url:'osiedlenaturama.pl/pl/lista-mieszkan',trust:'висока',state:'ok',last:270,v:2,runs:[64,63,63,62,61,61,60,60,59,59]},
+  {id:'s5',inv:'dab',type:'developer_site',url:'dabrowki.com/wyszukiwarka-domow',trust:'висока',state:'ok',last:270,v:1,runs:[9,9,9,9,8,8,8,8,8,8]},
+  {id:'s6',inv:'wi2',type:'aggregator',url:'otodom.pl/pl/inwestycja/wieruszowska-2',trust:'низька',state:'ok',last:1560,v:1,runs:[82,82,80,80,79,78,78,77,77,76],note:'Власного сайту продажу немає. Дані з агрегатора.'},
+  {id:'s7',inv:'wz2',type:'aggregator',url:'rynekpierwotny.pl (Warzelnia II)',trust:'низька',state:'ok',last:700,v:1,runs:[48,48,47,47,47,46,46,46,45,45]}
+];
+// [id,inv,no,rooms,area,floor,price,av,bal,src,done,ver]
+const LROWS = [
+ ['a3962','sw13','A.3.1',3,71.00,3,894600,'reserved',1,'s1'],['a3972','sw13','A.3.11',4,79.89,3,1030581,'available',1,'s1'],
+ ['a3963','sw13','A.3.2',2,45.62,3,615870,'available',1,'s1'],['a3968','sw13','A.3.7',3,69.97,3,909610,'available',1,'s1'],
+ ['a3974','sw13','A.4.2',2,45.75,4,626775,'available',1,'s1'],['a3975','sw13','A.4.3',2,44.97,4,611592,'available',1,'s1'],
+ ['a3978','sw13','A.4.6',2,42.35,4,618310,'reserved',1,'s1'],['a3979','sw13','A.4.7',3,70.57,4,882125,'reserved',1,'s1'],
+ ['a3984','sw13','A.5.1',3,70.09,5,932197,'available',1,'s1'],['a3993','sw13','A.5.10',3,67.73,5,860171,'available',1,'s1'],
+ ['a3986','sw13','A.5.3',2,45.14,5,618418,'available',1,'s1'],['a4005','sw13','A.7.1',2,53.18,7,728566,'available',0,'s1'],
+ ['a4030','sw13','B.1.2',3,74.52,1,797364,'available',1,'s1'],['a4112','sw13','B.10.2',4,76.80,10,1029120,'reserved',1,'s1'],
+ ['a4045','sw13','B.2.7',2,43.80,2,573780,'reserved',1,'s1'],['a4049','sw13','B.3.1',2,47.11,3,621852,'available',1,'s1'],
+ ['p1','pk18','P.2.04',2,41.0,2,590000,'available',0,'s2'],['p2','pk18','P.3.11',3,58.5,3,745000,'available',1,'s2'],
+ ['w1','wz2','W2.1.04',2,38.6,1,598000,'available',0,'s3'],['w2','wz2','W2.2.11',3,58.2,2,889000,'available',1,'s3'],
+ ['w3','wz2','W2.3.02',2,44.1,3,692000,'reserved',1,'s3'],['w4','wz2','W2.3.07',4,94.4,3,1390000,'available',1,'s3'],
+ ['ow2','wz2','W2.2.11',3,58.2,2,889000,'available',1,'s7'],
+ ['n1','nat2','N2.A.12',2,41.3,2,444000,'available',1,'s4'],['n2','nat2','N2.B.03',3,61.0,3,689000,'available',1,'s4'],
+ ['n3','nat2','N2.C.08',4,79.0,4,902000,'reserved',1,'s4'],
+ ['d1','dab','Dom 7',5,118.0,0,1190000,'available',1,'s5'],['d2','dab','Dom 12',4,96.0,0,980000,'available',1,'s5'],
+ ['j1','wi2','W2/4.07',2,46.0,2,559000,'available',1,'s6'],['j2','wi2','W2/4.15',3,59.0,3,641000,'available',1,'s6'],
+ ['j3','wi2','W2/6.02',4,70.0,4,725000,'available',1,'s6']
+];
+function mkListings(){return LROWS.map(r=>{const s=SRC0.find(x=>x.id===r[9]);return {id:r[0],inv:r[1],no:r[2],rooms:r[3],area:r[4],floor:r[5],price:r[6],av:r[7],pr:'present',bal:!!r[8],src:r[9],prop:r[0],ver:s.last,done:r[1]==='nat2'||r[1]==='wz2'||r[1]==='wi2'||r[1]==='dab'?'12.2026':'06.2026',fin:r[1]==='wz2'?'deweloperski':'pod klucz',missing:0}})}
+const STAGES=[['matching','Підбір'],['reservation','Резервація'],['contract','Umowa deweloperska'],['transfer','Передача власності'],['closed','Завершено'],['lost','Втрачено']];
+const SLOTS=['2026-10-17T11:00','2026-10-18T10:00','2026-10-19T17:30'];
+
+const S = {
+  role:'realtor', lang:'uk', page:'dashboard', cid:null, tab:'overview', modal:null, fq:'', fstage:'', lq:'', open:{}, ldist:[], lav:'', linv:'', lsrc:'',
+  users:JSON.parse(JSON.stringify(USERS)), sources:JSON.parse(JSON.stringify(SRC0)), listings:mkListings(),
+  mergedSuggest:false, repair:null, importDone:false, reminderForm:false,
+  clients:[
+   {id:'c1',name:'Anna Melnyk',phone:'+48 501 234 567',u:'u1',stage:'matching',lead:'Otodom',fin:'Кредит',consent:'12.10.2026 · форма на сайті',lang:'uk',last:1,next:'Дочекатись реакції на підбірку',reg:{dev:'Ataner',date:'12.10.2026',until:'12.01.2027',ok:true},
+    crit:{budget:700000,rooms:[2,3],minArea:42,cities:['Wrocław'],floorMin:3,by:202612,finish:'any'}},
+   {id:'c2',name:'Piotr Zieliński',phone:'+48 602 118 044',u:'u1',stage:'matching',lead:'Рекомендація',fin:'Готівка',consent:'03.10.2026 · усно, підтверджено в Telegram',lang:'pl',last:0,next:'Показ B.1.2 у суботу о 11:00',reg:{dev:'Ataner',date:'05.10.2026',until:'05.01.2027',ok:true},
+    crit:{budget:900000,rooms:[3,4],minArea:65,cities:['Wrocław'],floorMin:1,by:202612,finish:'pod klucz'}},
+   {id:'c3',name:'Svitlana Koval',phone:'+380 67 555 01 22',u:'u2',stage:'matching',lead:'Instagram',fin:'Кредит',consent:'09.10.2026 · форма',lang:'uk',last:2,next:'Надіслати першу підбірку',
+    crit:{budget:560000,rooms:[2],minArea:35,cities:['Poznań'],floorMin:1,by:202706,finish:'any'}},
+   {id:'c4',name:'Tomasz Wiśniewski',phone:'+48 513 090 311',u:'u2',stage:'reservation',lead:'Otodom',fin:'Кредит',consent:'28.09.2026 · форма',lang:'pl',last:1,next:'Передати документи на umowę rezerwacyjną',reg:{dev:'Nickel',date:'29.09.2026',until:'29.12.2026',ok:true},
+    crit:{budget:1000000,rooms:[3,4,5],minArea:70,cities:['Poznań'],floorMin:0,by:202712,finish:'any'}},
+   {id:'c5',name:'Kateryna Bondar',phone:'+48 790 421 880',u:'u1',stage:'matching',lead:'Telegram',fin:'Не з’ясовано',consent:'—',lang:'uk',last:0,next:'Уточнити бюджет і район',crit:null},
+   {id:'c6',name:'Marek Lewandowski',phone:'+48 668 300 215',u:'u3',stage:'contract',utils:{power:'wip',water:'todo',heat:'todo',net:'todo',waste:'todo'},lead:'Рекомендація',fin:'Готівка',consent:'14.09.2026 · форма',lang:'pl',last:3,next:'Підписання umowy deweloperskiej',
+    crit:{budget:850000,rooms:[3],minArea:60,cities:['Poznań'],floorMin:1,by:202612,finish:'any'}},
+   {id:'c7',name:'Olena Shevchuk',phone:'+48 531 770 002',u:'u3',stage:'matching',lead:'Facebook',fin:'Кредит',consent:'01.10.2026 · форма',lang:'uk',last:9,next:'—  (немає активності 9 днів)',
+    crit:{budget:650000,rooms:[2,3],minArea:40,cities:['Poznań'],dists:['Junikowo','Strzeszyn'],floorMin:1,by:202706,finish:'any'}},
+   {id:'c8',name:'Jan Kaczmarek',phone:'+48 500 600 700',u:'u1',stage:'matching',lead:'Otodom',fin:'Попереднє погодження',consent:'05.10.2026 · форма',lang:'pl',last:8,next:'—  (немає активності 8 днів)',
+    crit:{budget:640000,rooms:[2,3],minArea:42,cities:['Wrocław','Poznań'],floorMin:2,by:202612,finish:'any'}},
+   {id:'c9',name:'Natalia Kravets',phone:'+48 721 330 118',u:'u1',stage:'transfer',lead:'Рекомендація',fin:'Кредит',consent:'20.08.2026 · форма',lang:'uk',last:1,next:'Підписати договір з постачальником тепла',utils:{power:'done',water:'done',heat:'wip',net:'todo',waste:'done'},reg:{dev:'Ataner',date:'21.08.2026',until:'21.11.2026',ok:true},
+    crit:{budget:800000,rooms:[3],minArea:60,cities:['Wrocław'],dists:[],floorMin:1,by:202612,finish:'any'}}
+  ],
+  props:[ // delivery: draft|sent_unconfirmed|sent|opened; reaction: none|liked|disliked|wants_viewing; outcome: none|viewing|reserved|rejected
+   {id:'p1',cid:'c1',lid:'a3963',delivery:'opened',reaction:'liked',reason:'',outcome:'none',slot:null,offered:false},
+   {id:'p2',cid:'c1',lid:'a3975',delivery:'opened',reaction:'none',reason:'',outcome:'none',slot:null,offered:false},
+   {id:'p3',cid:'c1',lid:'a3978',delivery:'opened',reaction:'none',reason:'',outcome:'none',slot:null,offered:false},
+   {id:'p4',cid:'c1',lid:'a3986',delivery:'draft',reaction:'none',reason:'',outcome:'none',slot:null,offered:false},
+   {id:'p5',cid:'c2',lid:'a4030',delivery:'opened',reaction:'wants_viewing',reason:'',outcome:'viewing',slot:SLOTS[0],offered:true},
+   {id:'p6',cid:'c2',lid:'a3968',delivery:'sent',reaction:'none',reason:'',outcome:'none',slot:null,offered:false},
+   {id:'p7',cid:'c4',lid:'w2',delivery:'opened',reaction:'liked',reason:'',outcome:'reserved',slot:null,offered:false},
+   {id:'p8',cid:'c7',lid:'n2',delivery:'sent',reaction:'none',reason:'',outcome:'none',slot:null,offered:false}
+  ],
+  acts:[
+   {cid:'c1',k:'msg_out',t:'14.10 18:05',x:'Надіслано підбірку з 3 варіантів (WhatsApp)'},
+   {cid:'c1',k:'msg_in',t:'14.10 19:20',x:'«Другий і третій цікаві, перший трохи дорого»'},
+   {cid:'c1',k:'call',t:'12.10 11:40',x:'Дзвінок 12 хв: бюджет до 700 000 zł, кредит, потрібен 3+ поверх'},
+   {cid:'c1',k:'stage',t:'12.10 11:50',x:'Етап: Кваліфікований → Підбір'},
+   {cid:'c2',k:'msg_in',t:'15.10 08:15',x:'«Субота 11:00 підходить»'},
+   {cid:'c2',k:'note',t:'13.10 16:00',x:'Хоче тихий двір, паркінг обов’язково'}
+  ],
+  rems:[
+   {id:'r1',cid:'c1',u:'u1',title:'Немає реакції на лот A.4.3 понад 48 год',due:'2026-10-15T09:00',kind:'auto',rule:'48 год без реакції',done:false,h:[['14.10 09:00','Створено автоматично (правило)'],['15.10 09:00','Спрацювало: прострочено']]},
+   {id:'r2',cid:'c2',u:'u1',title:'Показ B.1.2 завтра о 11:00: підтвердити з відділом продажу',due:'2026-10-16T10:00',kind:'auto',rule:'показ завтра',done:false,h:[['15.10 08:20','Створено автоматично']]},
+   {id:'r3',cid:'c8',u:'u1',title:'Передзвонити Jan Kaczmarek',due:'2026-10-14T12:00',kind:'manual',rule:'',done:false,h:[['07.10 12:05','Створено: Marta Kowalska'],['10.10 12:00','Відкладено до 14.10'],['14.10 12:00','Спрацювало: прострочено']]},
+   {id:'r4',cid:'c3',u:'u2',title:'Надіслати першу підбірку Svitlana',due:'2026-10-15T15:00',kind:'manual',rule:'',done:false,h:[['13.10 10:00','Створено: Oleh Bondar']]},
+   {id:'r5',cid:'c4',u:'u2',title:'Реєстрація в Nickel спливає 29.12',due:'2026-12-15T10:00',kind:'auto',rule:'спливає реєстрація',done:false,h:[['29.09 14:00','Створено автоматично']]},
+   {id:'r6',cid:'c7',u:'u3',title:'Клієнт без активності 9 днів',due:'2026-10-15T08:00',kind:'auto',rule:'клієнт без активності >7 днів',done:false,h:[['15.10 08:00','Створено автоматично']]}
+  ],
+  views:[
+   {id:'v1',cid:'c2',lid:'a4030',at:SLOTS[0],st:'підтверджено',u:'u1'},
+   {id:'v2',cid:'c4',lid:'w2',at:'2026-10-19T14:00',st:'очікує підтвердження клієнта',u:'u2'}
+  ],
+  deals:[
+   {id:'d1',cid:'c6',u:'u3',lid:'w2',price:780000,pct:3,stage:'umowa deweloperska',paid:false},
+   {id:'d2',cid:'c4',u:'u2',lid:'w4',price:1290000,pct:3,stage:'umowa rezerwacyjna',paid:false},
+   {id:'d3',cid:'c2',u:'u1',lid:'a3984',price:921000,pct:2.5,stage:'акт передачі',paid:true}
+  ],
+  secondary:[
+   {id:'t1',url:'otodom.pl/pl/oferta/2-pokojowe-mieszkanie-54m2-ID4xYz1',title:'2 кімн., 54 м², Wrocław Krzyki',price:612000,st:'active',chk:'сьогодні 06:02',cid:'c8'},
+   {id:'t2',url:'olx.pl/d/oferta/mieszkanie-3-pok-IDabc12',title:'3 кімн., 62 м², Poznań Łazarz',price:689000,st:'ended',chk:'сьогодні 06:02',cid:'c7'},
+   {id:'t3',url:'morizon.pl/oferta/sprzedaz-mieszkanie-…',title:'2 кімн., 48 м², Poznań Jeżyce',price:575000,st:'unknown',chk:'вчора 14:03 (помилка 403)',cid:'c3'}
+  ],
+  notifs:[
+   {to:'u1',t:'06:12',x:'Дайджест прогону 06:00: 2 нові збіги для Piotr Zieliński (A.3.7, A.5.1)',k:'info'}
+  ]
+};
+
+/* ============ i18n (вибір мови інтерфейсу; для прототипу перекладено навігацію і заголовки) ============ */
+const T={uk:{dashboard:'Сьогодні',clients:'Клієнти',listings:'Лоти',viewings:'Покази',reminders:'Нагадування',secondary:'Вторинка',team:'Команда',sources:'Джерела',deals:'Угоди й комісії',import:'Імпорт з Excel',users:'Користувачі',grpWork:'Робота',grpOwner:'Керування',grpTech:'Технічне'},
+ ru:{dashboard:'Сегодня',clients:'Клиенты',listings:'Лоты',viewings:'Показы',reminders:'Напоминания',secondary:'Вторичка',team:'Команда',sources:'Источники',deals:'Сделки и комиссии',import:'Импорт из Excel',users:'Пользователи',grpWork:'Работа',grpOwner:'Управление',grpTech:'Техническое'},
+ pl:{dashboard:'Dzisiaj',clients:'Klienci',listings:'Lokale',viewings:'Prezentacje',reminders:'Przypomnienia',secondary:'Rynek wtórny',team:'Zespół',sources:'Źródła',deals:'Transakcje i prowizje',import:'Import z Excela',users:'Użytkownicy',grpWork:'Praca',grpOwner:'Zarządzanie',grpTech:'Techniczne'}};
+const t=k=>(T[S.lang]&&T[S.lang][k])||T.uk[k]||k;
+const PAGES={dashboard:['owner','realtor'],clients:['owner','realtor'],listings:['owner','realtor','admin'],viewings:['owner','realtor'],reminders:['owner','realtor'],secondary:['owner','realtor'],team:['owner'],sources:['owner','admin'],deals:['owner'],import:['owner'],users:['owner']};
+const GROUPS=[['grpWork',['dashboard','clients','listings','viewings','reminders','secondary']],['grpOwner',['team','deals','import','users']],['grpTech',['sources']]];
+
+/* ============ ХЕЛПЕРИ ============ */
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const zl=n=>Math.round(n).toLocaleString('pl-PL')+' zł';
+const U=id=>S.users.find(u=>u.id===id);
+const C=id=>S.clients.find(c=>c.id===id);
+const Ls=id=>S.listings.find(l=>l.id===id);
+const SR=id=>S.sources.find(s=>s.id===id);
+const me=()=>S.role==='owner'?U('u0'):S.role==='admin'?U('u9'):U('u1');
+const vis=()=>S.role==='owner'?S.clients:S.role==='realtor'?S.clients.filter(c=>c.u===me().id):[];
+const fmtAt=s=>new Date(s).toLocaleString('uk-UA',{weekday:'short',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+const ago=m=>m<2?'щойно':m<60?m+' хв тому':m<1440?Math.round(m/60)+' год тому':Math.round(m/1440)+' дн тому';
+const fresh=m=>m<=480?'ok':m<=1500?'warn':'bad';
+const stageName=k=>(STAGES.find(s=>s[0]===k)||[])[1]||k;
+const lotName=l=>`${INV[l.inv].n} · ${l.no}`;
+const lotSub=l=>`${l.rooms} кімн. · ${String(l.area).replace('.',',')} м² · ${l.floor? l.floor+' пов.':'будинок'}`;
+function avPill(l){
+  if(l.pr==='removed')return '<span class="pill bad">Знято, ймовірно продано</span>';
+  if(l.pr==='missing')return '<span class="pill warn">Зник зі списку, перевіряється</span>';
+  return {available:'<span class="pill ok">Wolne</span>',reserved:'<span class="pill warn">Rezerwacja</span>',sold:'<span class="pill bad">Sprzedane</span>',unknown:'<span class="pill">Невідомо</span>'}[l.av];
+}
+const freshPill=l=>l.manual&&l.manual.mode==='manual'?'<span class="pill warn plain" title="Статус перевіряє людина">без автоперевірки</span>':`<span class="pill ${fresh(l.ver)} plain" title="Останній успішний розбір джерела">${l.ver<2?'перевірено щойно':'перевірено '+ago(l.ver)}</span>`;
+const typeLabel=s=>s.type==='aggregator'?'агрегатор':s.type==='tracked_link'?'окремі посилання':'сайт забудовника';
+const unavailable=l=>l.av!=='available'||l.pr!=='present';
+function notify(to,x,k='info'){S.notifs.unshift({to,t:'10:3'+Math.floor(Math.random()*9),x,k})}
+function act(cid,k,x){S.acts.unshift({cid,k,t:'15.10 10:3'+Math.floor(Math.random()*9),x})}
+function toast(x){S.toast=x;render();clearTimeout(toast._t);toast._t=setTimeout(()=>{S.toast=null;render()},2600)}
+const ym=s=>{const [m,y]=s.split('.');return +y*100+ +m};
+function score(c,l){
+  const cr=c.crit; if(!cr) return null;
+  const inv=INV[l.inv];
+  if(l.pr==='removed'||l.av==='sold') return {gone:1};
+  if(cr.cities.length&&!cr.cities.includes(inv.city)) return {fail:'місто'};
+  if((cr.dists||[]).length&&!cr.dists.includes(inv.dist)) return {fail:'район'};
+  if(l.price>cr.budget) return {fail:'бюджет'};
+  if(cr.rooms.length&&!cr.rooms.includes(l.rooms)) return {fail:'кімнати'};
+  if(l.area<cr.minArea) return {fail:'площа'};
+  const p=Math.max(0,Math.min(30,Math.round(30*(1.15-l.price/cr.budget)/0.45)));
+  const a=l.area>=cr.minArea*1.15?20:12, f=l.floor>=cr.floorMin?15:5, d=ym(l.done)<=cr.by?15:6;
+  const fi=(cr.finish==='any'||cr.finish===l.fin)?10:3, x=l.bal?10:4;
+  return {total:p+a+f+d+fi+x,parts:[['Ціна',p,30],['Площа',a,20],['Поверх',f,15],['Термін здачі',d,15],['Стан',fi,10],['Балкон / садок',x,10]]};
+}
+/* Повний довідник районів міста (у повній версії це довідник, а не жорстко записаний список) */
+const CITY_D={
+  'Wrocław':['Śródmieście','Stare Miasto','Nadodrze','Biskupin','Krzyki','Gaj','Księże','Fabryczna','Maślice','Oporów','Psie Pole','Kowale'],
+  'Poznań':['Centrum','Jeżyce','Sołacz','Łazarz','Wilda','Grunwald','Junikowo','Strzeszyn','Winogrady','Piątkowo','Naramowice','Rataje','Kobylepole','Dąbrówka']
+};
+const distsOf=cities=>[...new Set(cities.flatMap(c=>CITY_D[c]||[]))];
+const distCount=d=>S.listings.filter(l=>INV[l.inv].dist===d).length;
+function distPanel(){
+  const cities=[...new Set(Object.values(INV).map(i=>i.city))];
+  return `<div class="card" style="margin-bottom:12px"><header><div><h2>Райони</h2><div class="small muted">Оберіть райони, які хочете дивитися. Якщо нічого не вибрано, показуються всі.</div></div>${S.ldist.length?`<button class="btn sm" data-a="clearDist">Скинути (${S.ldist.length})</button>`:''}</header>
+  <div class="grid g2">${cities.map(c=>`<div><h3 style="margin-bottom:6px">${esc(c)}</h3><div class="row">${distsOf([c]).map(d=>{const n=S.listings.filter(l=>INV[l.inv].dist===d).length;return `<label class="chip ${S.ldist.includes(d)?'on':''}" style="display:inline-flex;gap:6px;align-items:center"><input type="checkbox" data-c="ldist" data-n="${esc(d)}" ${S.ldist.includes(d)?'checked':''}> ${esc(d)} <span class="mono small">${n}</span></label>`}).join('')}</div></div>`).join('')}</div></div>`;
+}
+function matches(c){
+  const seen=new Set();
+  return S.listings.map(l=>({l,s:score(c,l)})).filter(m=>m.s&&m.s.total).sort((a,b)=>(unavailable(a.l)-unavailable(b.l))||(b.s.total-a.s.total))
+   .filter(m=>{const k=m.l.prop;if(seen.has(k))return false;seen.add(k);return true});
+}
+const propsOf=cid=>S.props.filter(p=>p.cid===cid);
+function alerts(){
+  const out=[];
+  vis().forEach(c=>propsOf(c.id).forEach(p=>{const l=Ls(p.lid);if(unavailable(l)&&['sent','opened','sent_unconfirmed'].includes(p.delivery)&&p.outcome==='none'&&p.reaction!=='disliked')out.push({c,p,l})}));
+  return out;
+}
+function remsFor(){return S.rems.filter(r=>!r.done&&(S.role==='owner'||r.u===me().id))}
+const overdue=r=>new Date(r.due)<NOW;
+
+/* ============ СТОРІНКИ ============ */
+function pageTop(title,sub,right=''){return `<div class="top"><div><h1>${esc(title)}</h1>${sub?`<p>${sub}</p>`:''}</div><div class="row">${right}</div></div>`}
+
+function pDashboard(){
+  const al=alerts(), rs=remsFor().filter(r=>new Date(r.due)<=new Date('2026-10-15T23:59')), nf=S.notifs.filter(n=>n.to===me().id||(S.role==='owner'&&n.to==='owner')).slice(0,5);
+  const vw=S.views.filter(v=>S.role==='owner'||v.u===me().id);
+  const bad=al.length;
+  return pageTop(`Доброго ранку, ${me().name.split(' ')[0]}`,`Чт, 15 жовтня · останній прогін джерел 06:00, наступний 14:00 (Europe/Warsaw)`,S.role==='owner'?'':'' )+
+  `<div class="grid g4" style="margin-bottom:14px">
+    <div class="card"><div class="kpi"><b>${vis().length}</b><span>Клієнтів у роботі</span></div></div>
+    <div class="card"><div class="kpi"><b style="color:${bad?'var(--bad)':'var(--ok)'}">${bad}</b><span>Пропозицій із недоступним лотом</span></div></div>
+    <div class="card"><div class="kpi"><b>${rs.length}</b><span>Нагадувань на сьогодні</span></div></div>
+    <div class="card"><div class="kpi"><b>${vw.length}</b><span>Найближчих показів</span></div></div>
+  </div>`+
+  (al.length?al.map(a=>`<div class="alert" style="margin-bottom:10px"><div><b>Лот ${esc(a.l.no)} (${esc(INV[a.l.inv].n)}) тепер: ${a.l.pr==='present'?esc(({reserved:'Rezerwacja',sold:'Sprzedane',unknown:'невідомо'})[a.l.av]):'знято / перевіряється'}</b><div class="small">Пропонувався клієнту ${esc(a.c.name)}. Підбірка показує клієнту «недоступно».</div></div><div class="row"><button class="btn sm" data-a="openClient" data-id="${a.c.id}" data-tab="proposals">Відкрити підбірку</button><button class="btn sm" data-a="openClient" data-id="${a.c.id}" data-tab="match">Знайти заміну</button></div></div>`).join(''):
+   `<div class="note" style="margin-bottom:14px">Усі запропоновані клієнтам лоти зараз доступні. Спробуйте «Демо-сценарії» зліва.</div>`)+
+  `<div class="grid g21"><div class="grid">
+    <div class="card"><header><h2>Нагадування на сьогодні</h2><button class="btn sm" data-a="go" data-id="reminders">Усі</button></header><div class="list">${rs.map(r=>remItem(r)).join('')||'<p class="muted">Немає</p>'}</div></div>
+    <div class="card"><header><h2>Найближчі покази</h2><button class="btn sm" data-a="go" data-id="viewings">Усі</button></header><div class="list">${vw.map(v=>`<div class="item"><div><b>${esc(C(v.cid).name)}</b><div class="small muted">${esc(lotName(Ls(v.lid)))}</div></div><div style="text-align:right"><div class="num">${fmtAt(v.at)}</div><span class="pill ${v.st==='підтверджено'?'ok':'warn'}">${esc(v.st)}</span></div></div>`).join('')||'<p class="muted">Немає</p>'}</div></div>
+  </div>
+  <div class="card"><header><h2>Сповіщення</h2><span class="small muted">Копія йде в Telegram</span></header><div class="list">${nf.map(n=>`<div class="item"><div><div>${esc(n.x)}</div><div class="small muted">${n.t}</div></div><span class="pill ${n.k==='bad'?'bad':n.k==='ok'?'ok':'info'} plain">${n.k==='bad'?'зміна':n.k==='ok'?'реакція':'дайджест'}</span></div>`).join('')||'<p class="muted">Немає</p>'}</div></div></div>`;
+}
+function remItem(r){
+  const c=C(r.cid);
+  return `<div class="item"><div><div>${esc(r.title)}</div><div class="small muted">${esc(c?c.name:'')} ${r.kind==='auto'?'· авто: '+esc(r.rule):'· вручну'}</div></div><div class="row" style="flex-wrap:nowrap">${overdue(r)?'<span class="pill bad">прострочено</span>':''}<button class="btn sm" data-a="remDone" data-id="${r.id}">Виконано</button></div></div>`;
+}
+
+function pClients(){
+  const q=S.fq.toLowerCase(), list=vis().filter(c=>(!q||c.name.toLowerCase().includes(q)||c.phone.includes(q))&&(!S.fstage||c.stage===S.fstage));
+  return pageTop('Клієнти',S.role==='owner'?'Клієнти з підписаним договором співпраці. Власник бачить усіх клієнтів агенції.':'Клієнти з підписаним договором співпраці. Ви бачите лише своїх, решту бачить власник.',`<button class="btn pri" data-a="modal" data-id="newClient">+ Новий клієнт</button>`)+
+  `<div class="card"><div class="row" style="margin-bottom:12px"><input type="search" data-s="fq" value="${esc(S.fq)}" placeholder="Ім’я або телефон" style="max-width:260px"><div class="stagebar"><span class="chip ${S.fstage?'':'on'}" data-a="fstage" data-id="">Усі</span>${STAGES.map(s=>`<span class="chip ${S.fstage===s[0]?'on':''}" data-a="fstage" data-id="${s[0]}">${s[1]}</span>`).join('')}</div></div>
+  <div class="scroll"><table class="tbl"><thead><tr><th>Клієнт</th><th>Етап</th>${S.role==='owner'?'<th>Ріелтор</th>':''}<th>Критерії</th><th>Остання активність</th><th>Наступний крок</th></tr></thead><tbody>${list.map(c=>{const cr=c.crit;return `<tr class="click" data-a="openClient" data-id="${c.id}"><td><b>${esc(c.name)}</b><div class="small muted mono">${esc(c.phone)}</div></td><td><span class="pill info plain">${stageName(c.stage)}</span>${showUtil(c)?`<div class="small ${utilDone(c)<5?'':'muted'}" style="margin-top:3px">комунікації ${utilDone(c)}/5</div>`:''}</td>${S.role==='owner'?`<td>${esc(U(c.u).name)}</td>`:''}<td class="small">${cr?`до ${zl(cr.budget)} · ${cr.rooms.join('/')} кімн. · ${esc(cr.cities.join(', '))}`:'<span class="pill warn">не заповнено</span>'}</td><td>${c.last>7?`<span class="pill bad">${c.last} дн</span>`:c.last===0?'сьогодні':c.last+' дн тому'}</td><td class="small">${esc(c.next)}</td></tr>`}).join('')||`<tr><td colspan="6" class="muted">Нічого не знайдено</td></tr>`}</tbody></table></div></div>`;
+}
+
+function pClient(){
+  const c=C(S.cid); if(!c) return pClients();
+  const tabs=[['overview','Огляд'],['criteria','Критерії'],['match','Підбір'],['proposals','Пропозиції і покази']];
+  let body='';
+  if(S.tab==='overview') body=cOverview(c); if(S.tab==='criteria') body=cCriteria(c); if(S.tab==='match') body=cMatch(c); if(S.tab==='proposals') body=cProposals(c);
+  return `<div class="row" style="margin-bottom:6px"><button class="btn sm" data-a="go" data-id="clients">← Клієнти</button></div>`+
+   pageTop(c.name,`<span class="mono">${esc(c.phone)}</span> · ${esc(U(c.u).name)} · мова ${c.lang==='uk'?'українська':'польська'}`,`<span class="pill info plain">${stageName(c.stage)}</span>`)+
+   `<div class="tabs">${tabs.map(t=>`<button class="${S.tab===t[0]?'on':''}" data-a="tab" data-id="${t[0]}">${t[1]}</button>`).join('')}</div>`+body;
+}
+const UT=[['power','Електроенергія (prąd)'],['water','Вода й каналізація'],['heat','Опалення / газ'],['net','Інтернет'],['waste','Вивіз відходів']];
+const UST=[['todo','Не розпочато'],['wip','Договір подано'],['done','Підключено']];
+const utilsOf=c=>c.utils||(c.utils={power:'todo',water:'todo',heat:'todo',net:'todo',waste:'todo'});
+const utilDone=c=>UT.filter(u=>utilsOf(c)[u[0]]==='done').length;
+const showUtil=c=>['contract','transfer','closed'].includes(c.stage);
+function utilCard(c){
+  if(!showUtil(c)) return `<div class="card flat"><header><h2>Комунальні послуги</h2></header><p class="small muted" style="margin:0">З’явиться на етапі «Umowa deweloperska». Ріелтор допомагає укласти договори з постачальниками.</p></div>`;
+  const n=utilDone(c);
+  return `<div class="card"><header><h2>Комунальні послуги</h2><span class="pill ${n===5?'ok':'warn'}">${n} з 5 підключено</span></header><div class="list small">${UT.map(u=>{const v=utilsOf(c)[u[0]];return `<div class="item" style="align-items:center"><span>${u[1]}</span><select data-c="util" data-id="${c.id}" data-k="${u[0]}" style="max-width:150px">${UST.map(s=>`<option value="${s[0]}" ${v===s[0]?'selected':''}>${s[1]}</option>`).join('')}</select></div>`}).join('')}</div><div class="bar" style="margin-top:8px"><i style="width:${n/5*100}%"></i></div>${c.stage!=='closed'&&n<5?`<p class="small muted" style="margin:8px 0 0">Угоду не можна завершити, поки не підключено всі комунікації.</p>`:''}</div>`;
+}
+function cOverview(c){
+  const a=S.acts.filter(x=>x.cid===c.id), ic={msg_in:'←',msg_out:'→',call:'☎',note:'✎',stage:'▸',react:'♥'};
+  return `<div class="grid g21"><div class="card"><header><h2>Стрічка активностей</h2><div class="row"><button class="btn sm" data-a="modal" data-id="note">+ Нотатка / дзвінок</button></div></header><div class="timeline">${a.map(x=>`<div class="tl"><div class="dot">${ic[x.k]||'·'}</div><div><div>${esc(x.x)}</div><div class="small muted">${x.t}</div></div></div>`).join('')||'<p class="muted">Поки порожньо</p>'}</div></div>
+  <div class="grid">
+   <div class="card"><header><h2>Профіль</h2></header><div class="list small">
+     <div class="item"><span class="muted">Джерело ліда</span><span>${esc(c.lead)}</span></div>
+     <div class="item"><span class="muted">Фінансування</span><span>${esc(c.fin)}</span></div>
+     <div class="item"><span class="muted">Згода RODO</span><span style="text-align:right">${esc(c.consent)}</span></div>
+     <div class="item"><span class="muted">Наступний крок</span><span style="text-align:right">${esc(c.next)}</span></div></div></div>
+   <div class="card"><header><h2>Реєстрація в забудовника</h2></header>${c.reg?`<div class="small">${esc(c.reg.dev)} · зареєстровано ${c.reg.date}<br>Діє до ${c.reg.until} <span class="pill ok">підтверджено</span></div><p class="small muted" style="margin:8px 0 0">Захищає комісію. За 14 днів до завершення прийде нагадування.</p>`:`<p class="small muted" style="margin:0 0 8px">Клієнта ще не зареєстровано в забудовника.</p><button class="btn sm" data-a="toast" data-id="Додано нагадування: зареєструвати клієнта">Нагадати зареєструвати</button>`}</div>
+   <div class="card"><header><h2>Етап</h2></header><select data-c="stage" data-id="${c.id}">${STAGES.map(s=>`<option value="${s[0]}" ${c.stage===s[0]?'selected':''}>${s[1]}</option>`).join('')}</select><p class="small muted" style="margin:8px 0 0">Від етапу «Резервація» етап рухає угода.</p></div>${utilCard(c)}
+  </div></div>`;
+}
+function cCriteria(c){
+  const cr=c.crit;
+  if(!cr) return `<div class="card"><p>Критерії ще не заповнено.</p><div class="note warn">На етапі 2 тут буде кнопка «Заповнити з нотатки»: AI перетворить запис розмови на фільтри, а ви підтвердите. Імʼя й телефон до AI не передаються.</div><div class="row" style="margin-top:12px"><button class="btn pri" data-a="initCrit" data-id="${c.id}">Заповнити вручну</button></div></div>`;
+  return `<div class="card"><header><h2>Обов’язкові критерії (жорсткі фільтри)</h2><span class="small muted">Зміни одразу переоцінюють підбір</span></header><div class="grid g3">
+   <div class="field"><label>Бюджет до, zł</label><input type="number" step="10000" value="${cr.budget}" data-c="cr" data-k="budget" data-id="${c.id}"></div>
+   <div class="field"><label>Мін. площа, м²</label><input type="number" value="${cr.minArea}" data-c="cr" data-k="minArea" data-id="${c.id}"></div>
+   <div class="field"><label>Місто</label><select data-c="cr" data-k="cities" data-id="${c.id}"><option value="Wrocław" ${cr.cities.join()==='Wrocław'?'selected':''}>Wrocław</option><option value="Poznań" ${cr.cities.join()==='Poznań'?'selected':''}>Poznań</option><option value="both" ${cr.cities.length>1?'selected':''}>Wrocław і Poznań</option></select></div>
+   <div class="field"><label>Кімнати</label><div class="row">${[1,2,3,4,5].map(n=>`<label class="row" style="gap:4px"><input type="checkbox" ${cr.rooms.includes(n)?'checked':''} data-c="room" data-id="${c.id}" data-n="${n}"> ${n}</label>`).join('')}</div></div></div>
+   <div class="field" style="margin-top:14px"><label>Райони міста ${esc(cr.cities.join(' і '))}: усі, що є в довіднику. Нічого не вибрано = все місто</label><div class="row"><button class="btn sm" data-a="allDist" data-id="${c.id}">Вибрати всі</button><button class="btn sm" data-a="noDist" data-id="${c.id}">Зняти всі</button></div><div class="row">${distsOf(cr.cities).map(d=>`<label class="chip ${(cr.dists||[]).includes(d)?'on':''}" style="display:inline-flex;gap:6px;align-items:center"><input type="checkbox" data-c="dist" data-id="${c.id}" data-n="${esc(d)}" ${(cr.dists||[]).includes(d)?'checked':''}> ${esc(d)} <span class="mono small" title="Лотів зараз у базі">${distCount(d)}</span></label>`).join('')}</div></div>
+   <h3 style="margin:16px 0 10px">Бажані (впливають на бали)</h3><div class="grid g3">
+   <div class="field"><label>Поверх від</label><input type="number" value="${cr.floorMin}" data-c="cr" data-k="floorMin" data-id="${c.id}"></div>
+   <div class="field"><label>Стан</label><select data-c="cr" data-k="finish" data-id="${c.id}"><option value="any" ${cr.finish==='any'?'selected':''}>Будь-який</option><option value="pod klucz" ${cr.finish==='pod klucz'?'selected':''}>Pod klucz</option><option value="deweloperski" ${cr.finish==='deweloperski'?'selected':''}>Deweloperski</option></select></div>
+   <div class="field"><label>Здача не пізніше</label><select data-c="cr" data-k="by" data-id="${c.id}">${[[202612,'12.2026'],[202706,'06.2027'],[202712,'12.2027']].map(o=>`<option value="${o[0]}" ${cr.by===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select></div></div></div>`;
+}
+function failStats(c){const o={};S.listings.forEach(l=>{const s=score(c,l);if(s&&s.fail)o[s.fail]=(o[s.fail]||0)+1});return o}
+const WIDEN={'бюджет':'Бюджет +10%','район':'Усі райони міста','кімнати':'±1 кімната','площа':'Площа −5 м²','місто':'Додати обидва міста'};
+function matchPanel(c){
+  const cr=c.crit, fs=failStats(c), cd=cr.dists||[];
+  return `<div class="card" style="margin-bottom:12px"><header><h2>Головні критерії пошуку</h2><span class="small muted">Змінюйте тут, не виходячи з підбору: список переоцінюється одразу</span></header>
+  <div class="grid g3"><div class="field"><label>Бюджет до, zł</label><input type="number" step="10000" value="${cr.budget}" data-c="cr" data-k="budget" data-id="${c.id}"></div>
+  <div class="field"><label>Мін. площа, м²</label><input type="number" value="${cr.minArea}" data-c="cr" data-k="minArea" data-id="${c.id}"></div>
+  <div class="field"><label>Кімнати</label><div class="row">${[1,2,3,4,5].map(n=>`<label class="row" style="gap:4px"><input type="checkbox" ${cr.rooms.includes(n)?'checked':''} data-c="room" data-id="${c.id}" data-n="${n}"> ${n}</label>`).join('')}</div></div></div>
+  <div class="field" style="margin-top:12px"><label>Райони (${esc(cr.cities.join(' і '))}). Нічого не вибрано = все місто</label><div class="row"><button class="btn sm" data-a="allDist" data-id="${c.id}">Вибрати всі</button><button class="btn sm" data-a="noDist" data-id="${c.id}">Зняти всі</button></div><div class="row">${distsOf(cr.cities).map(d=>`<label class="chip ${cd.includes(d)?'on':''}" style="display:inline-flex;gap:6px;align-items:center"><input type="checkbox" data-c="dist" data-id="${c.id}" data-n="${esc(d)}" ${cd.includes(d)?'checked':''}> ${esc(d)} <span class="mono small">${distCount(d)}</span></label>`).join('')}</div></div>
+  ${Object.keys(fs).length?`<div class="row" style="margin-top:12px;align-items:flex-start"><span class="small muted" style="padding-top:5px">Відсіяно фільтрами. Розширити пошук:</span>${Object.entries(fs).map(([r,n])=>`<span class="row" style="gap:6px"><span class="pill warn plain">${esc(r)}: ${n}</span><button class="btn sm" data-a="widen" data-id="${c.id}" data-v="${esc(r)}">${WIDEN[r]}</button></span>`).join('')}</div>`:''}</div>`;
+}
+function cMatch(c){
+  if(!c.crit) return `<div class="card"><p>Спершу заповніть критерії.</p><button class="btn pri" data-a="tab" data-id="criteria">До критеріїв</button></div>`;
+  const ms=matches(c), inP=new Set(propsOf(c.id).map(p=>p.lid)), drafts=propsOf(c.id).filter(p=>p.delivery==='draft');
+  return matchPanel(c)+(ms.length?'':`<div class="note warn" style="margin-bottom:12px">Збігів немає. Розширте пошук кнопками вище, наприклад додайте райони або збільште бюджет.</div>`)+`<div class="row" style="justify-content:space-between;margin-bottom:12px"><div class="muted small">${ms.length} збігів. Зверху доступні лоти з найвищим балом. Дублікати з кількох джерел показані одним рядком.</div><button class="btn pri" ${drafts.length?'':'disabled'} data-a="modal" data-id="send">Підготувати і надіслати (${drafts.length})</button></div>
+  <div class="card"><div class="scroll"><table class="tbl"><thead><tr><th>Лот</th><th>Параметри</th><th>Ціна</th><th>Статус</th><th>Бал</th><th></th></tr></thead><tbody>${ms.map(m=>{const l=m.l;const dup=S.listings.filter(x=>x.prop===l.prop).length;return `<tr><td><b>${esc(lotName(l))}</b>${dup>1?`<div class="small muted">${dup} джерела об’єднано</div>`:''}</td><td class="small">${lotSub(l)}</td><td class="num">${zl(l.price)}<div class="small muted">${zl(l.price/l.area)}/м²</div></td><td>${avPill(l)}<div style="margin-top:3px">${freshPill(l)}</div></td><td style="min-width:150px"><b class="num">${m.s.total}</b><div class="bar" style="margin:3px 0 6px"><i style="width:${m.s.total}%"></i></div><details><summary class="small">з чого складається</summary><div class="parts" style="margin-top:6px">${m.s.parts.map(p=>`<span>${p[0]}</span><div class="bar"><i style="width:${p[1]/p[2]*100}%"></i></div><span class="num">${p[1]}/${p[2]}</span>`).join('')}</div></details></td><td>${inP.has(l.id)?'<span class="pill info plain">у підбірці</span>':`<button class="btn sm" ${unavailable(l)?'disabled title="Лот недоступний для пропозиції"':''} data-a="addProp" data-id="${l.id}">Додати</button>`}</td></tr>`}).join('')}</tbody></table></div></div>`;
+}
+function cProposals(c){
+  const ps=propsOf(c.id), anySent=ps.some(p=>p.delivery!=='draft');
+  const dl={draft:['Чернетка',''],sent_unconfirmed:['Не підтверджено','warn'],sent:['Надіслано','info'],opened:['Відкрито клієнтом','ok']};
+  const rx={none:'—',liked:'👍 Подобається',disliked:'👎 Ні',wants_viewing:'Хоче показ'};
+  return `<div class="row" style="justify-content:space-between;margin-bottom:12px"><div class="muted small">Статус пропозиції має три незалежні осі: доставка, реакція клієнта, результат.</div><button class="btn" ${anySent?'':'disabled'} data-a="modal" data-id="share">Переглянути сторінку клієнта</button></div>
+  <div class="card"><div class="scroll"><table class="tbl"><thead><tr><th>Лот</th><th>Доставка</th><th>Реакція</th><th>Результат</th><th>Показ</th><th></th></tr></thead><tbody>${ps.map(p=>{const l=Ls(p.lid);return `<tr><td><b>${esc(lotName(l))}</b><div class="small muted">${lotSub(l)}</div>${unavailable(l)?`<div style="margin-top:3px">${avPill(l)}</div>`:''}</td><td><span class="pill ${dl[p.delivery][1]}">${dl[p.delivery][0]}</span></td><td>${rx[p.reaction]}${p.reason?`<div class="small muted">${esc(p.reason)}</div>`:''}</td><td class="small">${{none:'—',viewing:'Показ',reserved:'Резервація',rejected:'Відмова'}[p.outcome]}</td><td class="small">${p.slot?fmtAt(p.slot):p.offered?'<span class="muted">слоти запропоновано</span>':'—'}</td><td class="row" style="flex-wrap:nowrap">${p.delivery!=='draft'&&!p.offered&&p.reaction!=='disliked'?`<button class="btn sm" data-a="offerSlots" data-id="${p.id}">Запропонувати слоти</button>`:''}${p.delivery!=='draft'?`<button class="btn sm" data-a="quick" data-id="${p.id}" data-v="liked" title="Клієнт відповів у чаті">Так</button><button class="btn sm" data-a="quick" data-id="${p.id}" data-v="disliked" title="Клієнт відповів у чаті">Ні</button>`:''}</td></tr>`}).join('')||'<tr><td colspan="6" class="muted">Ще немає пропозицій. Додайте лоти на вкладці «Підбір».</td></tr>'}</tbody></table></div></div>
+  <p class="small muted">Кнопки «Так / Ні» фіксують відповідь, яка прийшла клієнтом у месенджері (етап 3 прибере ручний крок).</p>`;
+}
+
+function pListings(){
+  const q=S.lq.toLowerCase(), invs=Object.keys(INV);
+  let list=S.listings.filter(l=>(!q||(l.no+INV[l.inv].n).toLowerCase().includes(q))&&(!S.lav||l.av===S.lav||(S.lav==='gone'&&l.pr!=='present'))&&(!S.linv||l.inv===S.linv)&&(!S.ldist.length||S.ldist.includes(INV[l.inv].dist)));
+  const sug=!S.mergedSuggest&&S.listings.find(l=>l.id==='ow2');
+  return pageTop('Лоти',`Єдина база з сайтів забудовників. Бейдж показує, коли джерело було успішно розібране, а не коли ви відкрили сторінку.`,S.role==='admin'?'<span class="pill plain">лише читання</span>':`<button class="btn" data-a="modal" data-id="manualLot">+ Додати лот вручну</button>`)+
+  (sug?`<div class="alert info" style="margin-bottom:12px"><div><b>Схоже на дублікат:</b> Warzelnia II · W2.2.11 є на сайті Nickel і на rynekpierwotny. <div class="small">Збіг: інвестиція, 3 кімн., 58,2 м², поверх 2, ціна.</div></div><div class="row"><button class="btn sm pri" data-a="merge">Об’єднати в один об’єкт</button><button class="btn sm" data-a="toast" data-id="Окремо: пара більше не пропонуватиметься">Це різні лоти</button></div></div>`:'')+
+  distPanel()+`<div class="card"><div class="row" style="margin-bottom:12px"><input type="search" data-s="lq" value="${esc(S.lq)}" placeholder="Номер лоту або інвестиція" style="max-width:240px"><select data-c="linv" style="max-width:200px"><option value="">Усі інвестиції</option>${invs.map(i=>`<option value="${i}" ${S.linv===i?'selected':''}>${INV[i].n}</option>`).join('')}</select>
+  <div class="stagebar">${[['','Усі'],['available','Wolne'],['reserved','Rezerwacja'],['gone','Знято']].map(o=>`<span class="chip ${S.lav===o[0]?'on':''}" data-a="lav" data-id="${o[0]}">${o[1]}</span>`).join('')}</div></div></div>${groupedListings(list)}`;
+}
+function lotTable(ls){
+  return `<div class="scroll"><table class="tbl"><thead><tr><th>Лот</th><th>Параметри</th><th>Ціна</th><th>Статус</th></tr></thead><tbody>${ls.map(l=>`<tr><td><b>${esc(INV[l.inv].n)} · ${esc(l.no)}</b><div class="small muted">${INV[l.inv].city} · ${esc(INV[l.inv].dist)}${SR(l.src).type==='aggregator'?' · з агрегатора':''}${l.prop!==l.id?' · об’єднано':''}${l.manual?` · <span class="pill ${l.manual.mode==='auto'?'ok':'warn'} plain">${l.manual.mode==='auto'?'доданий вручну, стежимо автоматично':'доданий вручну, перевіряти вручну'}</span>`:''}</div></td><td class="small">${lotSub(l)}<div class="muted">здача ${l.done}</div></td><td class="num">${zl(l.price)}<div class="small muted">${zl(l.price/l.area)}/м²</div></td><td>${avPill(l)}<div style="margin-top:3px">${freshPill(l)}</div></td></tr>`).join('')}</tbody></table></div>`;
+}
+function groupedListings(list){
+  const man=list.filter(l=>l.manual), reg=list.filter(l=>!l.manual);
+  const groups=Object.keys(DEV).filter(d=>reg.some(l=>INV[l.inv].dev===d)).map(d=>({key:d,dev:d,title:DEV[d].n,ls:reg.filter(l=>INV[l.inv].dev===d)}));
+  if(man.length) groups.push({key:'_manual',title:'Додані вручну',ls:man});
+  if(!groups.length) return '<div class="card"><p class="muted" style="margin:0">Нічого не знайдено</p></div>';
+  const allOpen=groups.every(g=>S.open[g.key]);
+  return `<div class="row" style="justify-content:space-between;margin-bottom:8px"><span class="small muted">${groups.length} ${groups.length===1?'група':'груп'} за поточним фільтром. Натисніть на назву, щоб побачити лоти.</span><button class="btn sm" data-a="toggleAll">${allOpen?'Згорнути всі':'Розгорнути всі'}</button></div>`+groups.map(g=>{
+    const open=!!S.open[g.key], av=g.ls.filter(l=>!unavailable(l)).length, rs=g.ls.filter(l=>l.av==='reserved').length, invs=[...new Set(g.ls.map(l=>l.inv))];
+    const srcs=g.dev?S.sources.filter(s=>invs.includes(s.inv)):[];
+    return `<div class="card" style="margin-bottom:10px;padding:0"><div class="row" style="justify-content:space-between;padding:12px 16px;flex-wrap:nowrap">
+      <div data-a="toggleDev" data-id="${g.key}" role="button" tabindex="0" style="cursor:pointer;flex:1;min-width:0"><div class="row" style="gap:8px"><span class="mono muted">${open?'▾':'▸'}</span><b style="font-size:15px">${esc(g.title)}</b><span class="pill ok plain">Wolne ${av}</span><span class="pill warn plain">Rezerwacja ${rs}</span></div>
+      <div class="small muted" style="margin-left:22px">${g.ls.length} лотів${g.dev?` · ${invs.length} ${invs.length===1?'інвестиція':'інвестицій'}${DEV[g.dev].partner?` · партнер, комісія ${DEV[g.dev].pct}%`:' · без партнерської угоди'}`:' · окремі посилання'}</div></div>
+      ${g.dev&&S.role!=='admin'?`<button class="btn sm" data-a="modal" data-id="addSource" data-dev="${g.dev}">+ Інвестиція / посилання</button>`:''}</div>
+      ${open?`<div style="padding:0 16px 14px">${srcs.length?`<div class="list small" style="margin-bottom:10px">${srcs.map(s=>`<div class="item"><span><b>${esc(INV[s.inv].n)}</b> <span class="mono muted">${esc(s.url)}</span></span><span class="row" style="flex-wrap:nowrap"><span class="pill ${s.type==='aggregator'?'warn':'ok'} plain">${typeLabel(s)}</span><span class="pill ${fresh(s.last)} plain">${ago(s.last)}</span></span></div>`).join('')}</div>`:''}${lotTable(g.ls)}</div>`:''}</div>`}).join('');
+}
+
+
+function pViewings(){
+  const vw=S.views.filter(v=>S.role==='owner'||v.u===me().id);
+  const offered=S.props.filter(p=>p.offered&&!p.slot&&(S.role==='owner'||C(p.cid).u===me().id));
+  return pageTop('Покази','Ріелтор пропонує 2–3 слоти, клієнт обирає один на своїй сторінці. Підтверджений показ можна додати в календар (файл .ics).')+
+  `<div class="grid g2"><div class="card"><header><h2>Заплановані</h2></header><div class="list">${vw.map(v=>{const l=Ls(v.lid);return `<div class="item"><div><b>${fmtAt(v.at)}</b><div>${esc(C(v.cid).name)} · ${esc(lotName(l))}</div><div class="small muted">Відділ продажу ${esc(DEV[INV[l.inv].dev].n)} · адреса й контакт видно лише ріелтору</div></div><div style="text-align:right"><span class="pill ${v.st==='підтверджено'?'ok':'warn'}">${esc(v.st)}</span><div style="margin-top:6px"><button class="btn sm" data-a="toast" data-id="Файл .ics збережено (у прототипі умовно)">.ics</button></div></div></div>`}).join('')||'<p class="muted">Немає</p>'}</div></div>
+  <div class="card"><header><h2>Очікують відповіді клієнта</h2></header><div class="list">${offered.map(p=>`<div class="item"><div><b>${esc(C(p.cid).name)}</b><div class="small muted">${esc(lotName(Ls(p.lid)))} · запропоновано ${SLOTS.map(s=>fmtAt(s)).join(' / ')}</div></div><span class="pill warn">чекаємо</span></div>`).join('')||'<p class="muted">Немає</p>'}</div></div></div>`;
+}
+
+function pReminders(){
+  const rs=remsFor(), groups=[['Прострочені',rs.filter(overdue)],['Сьогодні й найближчі',rs.filter(r=>!overdue(r))]];
+  return pageTop('Нагадування і задачі','Ручні та автоматичні. Кожна зміна пишеться в історію нагадування.',`<button class="btn pri" data-a="modal" data-id="newRem">+ Нагадування</button>`)+
+  groups.map(g=>`<div class="card" style="margin-bottom:14px"><header><h2>${g[0]}</h2><span class="small muted">${g[1].length}</span></header><div class="list">${g[1].map(r=>`<div class="item"><div><div><b>${esc(r.title)}</b></div><div class="small muted">${esc(C(r.cid)?C(r.cid).name:'')} · до ${fmtAt(r.due)} ${r.kind==='auto'?`· <span class="pill info plain">авто: ${esc(r.rule)}</span>`:''}</div><details><summary class="small">Історія (${r.h.length})</summary><div class="small" style="margin:6px 0 0">${r.h.map(h=>`<div><span class="mono muted">${h[0]}</span> ${esc(h[1])}</div>`).join('')}</div></details></div><div class="row" style="flex-wrap:nowrap"><button class="btn sm" data-a="remSnooze" data-id="${r.id}">Відкласти на день</button><button class="btn sm pri" data-a="remDone" data-id="${r.id}">Виконано</button></div></div>`).join('')||'<p class="muted">Немає</p>'}</div></div>`).join('')+
+  `<p class="small muted">Авто-правила: немає реакції 48 год · показ завтра · протермінована задача · змінився лот у підбірці · спливає реєстрація в забудовника · комунікації не підключено за 14 днів до передачі · клієнт без активності понад 7 днів.</p>`;
+}
+
+function pSecondary(){
+  const st={active:['Активне','ok'],ended:['Оголошення знято','bad'],unknown:['Не вдалося перевірити','warn']};
+  return pageTop('Вторинка','Вторинний ринок не парситься масово. Ви додаєте посилання, система раз на день перевіряє, чи оголошення ще активне.',`<button class="btn pri" data-a="modal" data-id="addLink">+ Додати посилання</button>`)+
+  `<div class="card"><div class="scroll"><table class="tbl"><thead><tr><th>Оголошення</th><th>Клієнт</th><th>Ціна</th><th>Стан</th><th>Остання перевірка</th></tr></thead><tbody>${S.secondary.map(x=>`<tr><td><b>${esc(x.title)}</b><div class="small muted mono">${esc(x.url)}</div></td><td>${esc(C(x.cid)?C(x.cid).name:'—')}</td><td class="num">${zl(x.price)}</td><td><span class="pill ${st[x.st][1]}">${st[x.st][0]}</span></td><td class="small">${esc(x.chk)}</td></tr>`).join('')}</tbody></table></div></div>
+  <div class="note warn" style="margin-top:12px">Помилка отримання (403, капча) показується як «Не вдалося перевірити», а не «знято». Автоматично «продано» ніколи не ставиться.</div>`;
+}
+
+function pTeam(){
+  const rl=S.users.filter(u=>u.role==='realtor'&&u.active), stg=STAGES.slice(0,5);
+  const stalled=S.clients.filter(c=>c.last>7);
+  return pageTop('Команда','Те, чого власник раніше не бачив: хто з клієнтами що робить і де зависло.')+
+  `<div class="grid g4" style="margin-bottom:14px">
+   <div class="card"><div class="kpi"><b>${S.clients.length}</b><span>Клієнтів в агенції</span></div></div>
+   <div class="card"><div class="kpi"><b style="color:${stalled.length?'var(--warn)':'var(--ok)'}">${stalled.length}</b><span>Без активності понад 7 днів</span></div></div>
+   <div class="card"><div class="kpi"><b>${S.rems.filter(r=>!r.done&&overdue(r)).length}</b><span>Прострочених нагадувань</span></div></div>
+   <div class="card"><div class="kpi"><b>${S.props.filter(p=>p.delivery==='opened').length}/${S.props.filter(p=>p.delivery!=='draft').length}</b><span>Підбірок відкрито клієнтами</span></div></div></div>
+  <div class="card" style="margin-bottom:14px"><header><h2>Клієнти за етапами</h2></header><div class="scroll"><table class="tbl"><thead><tr><th>Ріелтор</th>${stg.map(s=>`<th>${s[1]}</th>`).join('')}<th>Прострочено</th><th></th></tr></thead><tbody>${rl.map(u=>`<tr><td><b>${esc(u.name)}</b></td>${stg.map(s=>{const n=S.clients.filter(c=>c.u===u.id&&c.stage===s[0]).length;return `<td class="num" style="${n?'':'color:var(--mute)'}">${n||'·'}</td>`}).join('')}<td class="num">${S.rems.filter(r=>r.u===u.id&&!r.done&&overdue(r)).length}</td><td><button class="btn sm" data-a="modal" data-id="handover" data-u="${u.id}">Передати клієнтів</button></td></tr>`).join('')}</tbody></table></div></div>
+  <div class="card" style="margin-bottom:14px"><header><h2>Комунікації не підключено</h2><span class="small muted">договори, де ріелтор допомагає з постачальниками</span></header><div class="list">${S.clients.filter(c=>showUtil(c)&&c.stage!=='closed'&&utilDone(c)<5).map(c=>`<div class="item"><div><b>${esc(c.name)}</b><div class="small muted">${stageName(c.stage)} · ${esc(U(c.u).name)}</div></div><span class="pill warn">${utilDone(c)} з 5</span></div>`).join('')||'<p class="muted">Немає</p>'}</div></div>
+  <div class="card"><header><h2>Потребують уваги</h2></header><div class="list">${stalled.map(c=>`<div class="item"><div><b>${esc(c.name)}</b><div class="small muted">${stageName(c.stage)} · ${esc(U(c.u).name)}</div></div><div class="row"><span class="pill bad">${c.last} дн без активності</span><button class="btn sm" data-a="openClient" data-id="${c.id}">Відкрити</button></div></div>`).join('')}</div></div>`;
+}
+
+function pSources(){
+  const sel=S.sel&&SR(S.sel);
+  const st={ok:['Працює','ok'],needs_review:['Потребує перегляду','bad'],paused:['Пауза','warn']};
+  if(sel) return pSource(sel);
+  const bad=S.sources.filter(s=>s.state!=='ok').length;
+  return pageTop('Джерела','Сторінки забудовників, які Jina зчитує двічі на день. Бачать лише власник і технічний admin.',`<button class="btn pri" data-a="modal" data-id="addSource">+ Додати джерело</button>`)+
+  (bad?`<div class="alert" style="margin-bottom:12px"><b>${bad} ${bad===1?'джерело потребує':'джерела потребують'} уваги</b></div>`:'')+
+  `<div class="card"><div class="scroll"><table class="tbl"><thead><tr><th>Інвестиція</th><th>Тип</th><th>Довіра</th><th>Стан</th><th>Лотів</th><th>Останній успішний розбір</th><th>Конфіг</th></tr></thead><tbody>${S.sources.map(s=>`<tr class="click" data-a="selSource" data-id="${s.id}"><td><b>${esc(INV[s.inv].n)}</b><div class="small muted mono">${esc(s.url)}</div></td><td class="small">${typeLabel(s)}</td><td><span class="pill ${s.trust==='висока'?'ok':'warn'} plain">${s.trust}</span></td><td><span class="pill ${st[s.state][1]}">${st[s.state][0]}</span></td><td class="num">${S.listings.filter(l=>l.src===s.id).length}</td><td><span class="pill ${fresh(s.last)} plain">${ago(s.last)}</span></td><td class="mono small">v${s.v}</td></tr>`).join('')}</tbody></table></div></div>`;
+}
+function pSource(s){
+  const r=S.repair&&S.repair.sid===s.id?S.repair:null, mx=Math.max(...s.runs);
+  return `<div class="row" style="margin-bottom:6px"><button class="btn sm" data-a="selSource" data-id="">← Джерела</button></div>`+pageTop(INV[s.inv].n,`<span class="mono">${esc(s.url)}</span>`,`<span class="pill ${s.state==='ok'?'ok':s.state==='paused'?'warn':'bad'}">${{ok:'Працює',paused:'Пауза',needs_review:'Потребує перегляду'}[s.state]}</span><button class="btn" data-a="toast" data-id="Запущено позачерговий прогін (прототип)">Запустити прогін зараз</button>`)+
+  `<div class="grid g3" style="margin-bottom:14px"><div class="card"><div class="kpi"><b>${S.listings.filter(l=>l.src===s.id).length}</b><span>лотів у базі</span></div></div><div class="card"><div class="kpi"><b>v${s.v}</b><span>активна версія конфігу</span></div></div><div class="card"><h3>Лотів за останні прогони</h3><div class="spark" style="margin-top:8px">${s.runs.map(n=>`<i style="height:${Math.max(4,n/mx*100)}%" title="${n}"></i>`).join('')}</div></div></div>`+
+  (s.note?`<div class="note warn" style="margin-bottom:14px">${esc(s.note)}</div>`:'')+
+  (r?repairView(r,s):s.state==='ok'?`<div class="card"><h2>Перевірки при кожному прогоні</h2><div class="list" style="margin-top:8px">${['Кількість лотів збігається з лічильником сайту','Пагінацію пройдено до кінця','Обов’язкові поля заповнені, ціни й площі правдоподібні','Усі слова статусів є у словнику','Зникло не більше max(3 лоти, 10%) відносно останнього доброго прогону'].map(x=>`<div class="item"><span>${x}</span><span class="pill ok">пройдено</span></div>`).join('')}</div></div>`:'')+
+  `<div class="card" style="margin-top:14px"><header><h2>Версії парсера</h2></header><div class="list small">${Array.from({length:s.v},(_,i)=>s.v-i).map(v=>`<div class="item"><span class="mono">v${v}</span><span class="muted">${v===s.v?'активна':'можна відкотити'} · ${v===1?'створено в майстрі (людина + AI)':'виправлено '+(v%2?'людиною':'AI, затверджено admin')}</span>${v!==s.v?`<button class="btn sm" data-a="toast" data-id="Відкат до v${v} (прототип)">Відкотити</button>`:'<span></span>'}</div>`).join('')}</div></div>`;
+}
+function repairView(r,s){
+  return `<div class="card pop"><header><h2>AI-ремонт · спроба ${r.attempt} з 3</h2><span class="pill warn">кандидат чекає на затвердження</span></header>
+  <p style="margin:0 0 8px"><b>Що зламалось:</b> ${esc(r.reason)}</p>
+  <p class="small muted" style="margin:0 0 12px">Дані заморожено: статуси лотів цього джерела не змінюються, поки не затверджено кандидата. AI запропонував новий конфіг, а виконує його наш детермінований рушій.</p>
+  <div class="grid g2"><div><h3>Старий селектор</h3><pre class="mono small card flat" style="margin:6px 0 0;overflow:auto">${esc(r.old)}</pre></div><div><h3>Кандидат</h3><pre class="mono small card flat" style="margin:6px 0 0;overflow:auto">${esc(r.cand)}</pre></div></div>
+  <h3 style="margin:16px 0 6px">Шлюзи перевірки</h3><div class="list">${r.gates.map(g=>`<div class="item"><div><b>${g[0]}</b><div class="small muted">${esc(g[1])}</div></div><span class="pill ${g[2]}">${g[2]==='ok'?'пройдено':'увага'}</span></div>`).join('')}</div>
+  <h3 style="margin:16px 0 6px">Різниця з останнім добрим прогоном</h3><div class="scroll"><table class="tbl"><thead><tr><th>Лот</th><th>Було</th><th>Стало</th></tr></thead><tbody>${r.diff.map(d=>`<tr><td>${esc(d[0])}</td><td>${esc(d[1])}</td><td>${esc(d[2])}</td></tr>`).join('')}</tbody></table></div>
+  <div class="row" style="margin-top:14px"><button class="btn pri" data-a="repairOk">Затвердити і застосувати</button><button class="btn" data-a="repairRetry">Спробувати ще раз (AI)</button><button class="btn bad" data-a="repairNo">Відхилити, лишити на паузі</button></div>
+  <p class="small muted" style="margin:10px 0 0">Авто-застосування для джерела вмикається після 3 успішних затверджених ремонтів поспіль (етап 2). Нове слово статусу ніколи не мапиться автоматично.</p></div>`;
+}
+
+function pDeals(){
+  const tot=S.deals.reduce((a,d)=>a+d.price*d.pct/100,0);
+  return pageTop('Угоди й комісії','Суми комісій бачить лише власник. Ріелтор бачить свої угоди без сум.')+
+  `<div class="grid g3" style="margin-bottom:14px"><div class="card"><div class="kpi"><b>${S.deals.length}</b><span>угод у роботі та закритих</span></div></div><div class="card"><div class="kpi"><b>${zl(tot)}</b><span>очікувана комісія</span></div></div><div class="card"><div class="kpi"><b>${zl(S.deals.filter(d=>d.paid).reduce((a,d)=>a+d.price*d.pct/100,0))}</b><span>отримано</span></div></div></div>
+  <div class="card"><div class="scroll"><table class="tbl"><thead><tr><th>Клієнт</th><th>Лот</th><th>Ріелтор</th><th>Етап угоди</th><th>Ціна</th><th>Ставка</th><th>Комісія</th></tr></thead><tbody>${S.deals.map(d=>`<tr><td>${esc(C(d.cid).name)}</td><td>${esc(lotName(Ls(d.lid)))}</td><td>${esc(U(d.u).name)}</td><td><span class="pill info plain">${esc(d.stage)}</span></td><td class="num">${zl(d.price)}</td><td class="num">${d.pct}%</td><td class="num"><b>${zl(d.price*d.pct/100)}</b> ${d.paid?'<span class="pill ok">отримано</span>':''}</td></tr>`).join('')}</tbody></table></div></div>`;
+}
+
+function pUsers(){
+  return pageTop('Користувачі','Звільнення: блокуємо акаунт і передаємо клієнтів іншому ріелтору. Історія лишається в системі.')+
+  `<div class="card"><div class="scroll"><table class="tbl"><thead><tr><th>Імʼя</th><th>Роль</th><th>Telegram</th><th>Клієнтів</th><th>Стан</th><th></th></tr></thead><tbody>${S.users.map(u=>`<tr><td><b>${esc(u.name)}</b></td><td><span class="pill plain ${u.role==='owner'?'info':u.role==='admin'?'warn':''}">${{owner:'власник',realtor:'ріелтор',admin:'технічний admin'}[u.role]}</span></td><td>${u.tg?'<span class="pill ok">привʼязано</span>':'<span class="pill">ні</span>'}</td><td class="num">${S.clients.filter(c=>c.u===u.id).length}</td><td>${u.active?'<span class="pill ok">активний</span>':'<span class="pill bad">заблокований</span>'}</td><td>${u.role==='realtor'&&u.active?`<button class="btn sm bad" data-a="modal" data-id="handover" data-u="${u.id}">Звільнити…</button>`:''}</td></tr>`).join('')}</tbody></table></div></div>
+  <h3 style="margin:20px 0 8px">Хто що бачить</h3><div class="card"><div class="scroll"><table class="tbl"><thead><tr><th>Розділ</th><th>Власник</th><th>Ріелтор</th><th>Admin</th><th>Клієнт (посилання)</th></tr></thead><tbody>${[['Клієнти й листування','усі','свої','—','своя підбірка'],['Лоти','усі','читає + додає вручну','читає','лише в підбірці'],['Джерела й парсери','так','—','так','—'],['Суми комісій','так','—','—','—'],['Користувачі, передача','так','—','—','—'],['Командна дошка','так','—','—','—']].map(r=>`<tr>${r.map((x,i)=>`<td class="${i?'small':''}">${i?`<span class="pill plain ${x==='—'?'':'ok'}">${x}</span>`:'<b>'+x+'</b>'}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div>`;
+}
+
+function pImport(){
+  return pageTop('Імпорт з Excel','Одноразово перенести клієнтів із таблиць. Кожен імпорт можна відкотити, поки записи не змінили.',`<button class="btn pri" data-a="modal" data-id="import">Почати імпорт</button>`)+
+  `<div class="card">${S.importDone?`<div class="note" style="margin-bottom:12px">Останній імпорт: klienci_2025.xlsx · створено 3 клієнти в прототипі (131 у повній версії), 4 конфлікти передано вам, 9 телефонів позначено для ручної перевірки.</div><button class="btn bad" data-a="importRollback">Відкотити імпорт</button>`:`<p class="muted" style="margin:0">Імпортів ще не було. Майстер: файл → відповідність колонок → прев’ю з конфліктами → імпорт.</p>`}</div>
+  <div class="grid g3" style="margin-top:14px">${[['Телефони → E.164','Номери без коду країни читаються як польські. Те, що не вдалося розібрати, позначається, без вгадування.'],['Конфлікти','Телефон уже є в клієнта іншого ріелтора: запис не перезаписується, рішення приймає власник.'],['Відкат','Скасовуються лише створені рядки, до яких ще ніхто не торкався.']].map(x=>`<div class="card flat"><h2>${x[0]}</h2><p class="small muted" style="margin:6px 0 0">${x[1]}</p></div>`).join('')}</div>`;
+}
+
+/* ============ СТОРІНКА КЛІЄНТА (телефон) ============ */
+function shareView(c){
+  const ps=propsOf(c.id).filter(p=>p.delivery!=='draft');
+  const pl=c.lang==='pl';
+  return `<div class="phone"><div class="scr">
+   <div><div style="font-size:12px" class="muted">${pl?'Wybrane dla Ciebie':'Підібрано для вас'}</div><div style="font-size:18px;font-weight:600">${esc(c.name.split(' ')[0])}, ${pl?'oto Twoje propozycje':'ось ваші варіанти'}</div></div>
+   ${ps.map(p=>{const l=Ls(p.lid),bad=unavailable(l);
+    return `<div class="lot"><div style="display:flex;justify-content:space-between;gap:8px"><b>${l.rooms} ${pl?'pok.':'кімн.'} · ${String(l.area).replace('.',',')} m²</b>${bad?`<span class="pill bad">${pl?'niedostępne':'недоступно'}</span>`:'<span class="pill ok">'+(pl?'dostępne':'доступно')+'</span>'}</div>
+     <div class="muted small">${INV[l.inv].n} · ${l.floor?l.floor+(pl?' piętro':' поверх'):''} · ${pl?'oddanie':'здача'} ${l.done}</div><div style="font-size:17px;font-weight:600" class="num">${zl(l.price)}</div>
+     ${bad?`<div class="small muted">${pl?'Ten lokal został zarezerwowany. Doradca przygotuje zamiennik.':'Цей лот уже зарезервовано. Ріелтор підбере заміну.'}</div>`:
+     p.reaction==='wants_viewing'||p.slot?`<div class="small"><b>${p.slot?(pl?'Prezentacja potwierdzona: ':'Показ підтверджено: ')+fmtAt(p.slot):(pl?'Wybierz termin:':'Оберіть час:')}</b></div>${p.slot?'':`<div style="display:flex;gap:6px;flex-wrap:wrap">${SLOTS.map(s=>`<button class="btn sm" data-a="pickSlot" data-id="${p.id}" data-v="${s}">${fmtAt(s)}</button>`).join('')}</div>`}`:
+     `<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn sm ${p.reaction==='liked'?'on':''}" data-a="react" data-id="${p.id}" data-v="liked">👍 ${pl?'Podoba się':'Подобається'}</button><button class="btn sm ${p.reaction==='disliked'?'on':''}" data-a="react" data-id="${p.id}" data-v="disliked">👎 ${pl?'Nie':'Ні'}</button><button class="btn sm" data-a="react" data-id="${p.id}" data-v="wants_viewing">${pl?'Chcę obejrzeć':'Хочу показ'}</button></div>`}
+     ${p.reaction==='disliked'?`<select data-c="reason" data-id="${p.id}" style="font-size:12px"><option>${pl?'Powód (opcjonalnie)':'Причина (необов’язково)'}</option>${['Ціна','Поверх','Площа','Район','Інше'].map(x=>`<option ${p.reason===x?'selected':''}>${x}</option>`).join('')}</select>`:''}</div>`}).join('')}
+   <div class="small muted" style="text-align:center">${pl?'Nie pokazujemy kontaktów dewelopera. Pytania kieruj do doradcy.':'Контактів забудовника тут немає. Питання ріелтору.'}</div></div></div>`;
+}
+
+/* ============ МОДАЛКИ ============ */
+function modalView(){
+  const m=S.modal; if(!m) return '';
+  const close='<button class="btn sm" data-a="closeModal">Закрити</button>';
+  let h='',w='';
+  if(m.id==='newClient'){
+    const dup=S.clients.find(c=>m.phone&&c.phone.replace(/\s/g,'')===m.phone.replace(/\s/g,''));
+    h=`<div class="row" style="justify-content:space-between"><h2>Новий клієнт</h2>${close}</div><div class="grid g2"><div class="field"><label>Імʼя</label><input type="text" id="nc_name" value="${esc(m.name||'')}"></div><div class="field"><label>Телефон</label><input type="text" id="nc_phone" data-c="ncphone" value="${esc(m.phone||'')}" placeholder="+48 …"></div>
+    <div class="field"><label>Джерело ліда</label><select id="nc_lead"><option>Otodom</option><option>Telegram</option><option>Instagram</option><option>Рекомендація</option></select></div><div class="field"><label>Фінансування</label><select id="nc_fin"><option>Кредит</option><option>Готівка</option><option>Попереднє погодження</option></select></div></div>
+    <label class="row small"><input type="checkbox" id="nc_cons" checked> Є згода на обробку даних і повідомлення (RODO)</label>
+    ${dup?`<div class="alert"><div><b>Такий телефон уже є в системі</b><div class="small">Клієнт ${S.role==='owner'||dup.u===me().id?esc(dup.name)+' · '+esc(U(dup.u).name):'закріплений за іншим ріелтором'}. Дублікат не створюється, власнику піде запит.</div></div><button class="btn sm" data-a="dupAsk">Повідомити власника</button></div>`:`<div class="row"><button class="btn pri" data-a="createClient">Створити</button></div>`}`;
+  }
+  if(m.id==='note') h=`<div class="row" style="justify-content:space-between"><h2>Запис в історію</h2>${close}</div><div class="field"><label>Тип</label><select id="n_k"><option value="note">Нотатка</option><option value="call">Дзвінок</option><option value="msg_in">Повідомлення від клієнта</option><option value="msg_out">Повідомлення клієнту</option></select></div><div class="field"><label>Текст</label><textarea id="n_x" placeholder="Наприклад: клієнт просить тихий двір і паркінг"></textarea></div><button class="btn pri" data-a="saveNote">Зберегти</button>`;
+  if(m.id==='send') h=sendModal(m,close);
+  if(m.id==='share'){w='wide';h=`<div class="row" style="justify-content:space-between"><h2>Як бачить клієнт</h2>${close}</div><p class="small muted" style="margin:0">Це публічна сторінка за посиланням <span class="mono">/s/…</span> без логіну. Натискайте кнопки за клієнта: реакція одразу з’явиться у картці й у сповіщеннях ріелтора.</p>${shareView(C(S.cid))}`}
+  if(m.id==='manualLot'){
+    const f=m.f||{inv:'sw13',no:'',rooms:2,area:45,price:600000,url:'https://developer.example.pl/oferta/osiedle-zielone/mieszkanie-b-4-2'}, chk=m.chk;
+    h=`<div class="row" style="justify-content:space-between"><h2>Додати лот вручну</h2>${close}</div>
+    <p class="small muted" style="margin:0">Посилання обов’язкове: системі треба знати, де стежити за статусом і ціною. Перед збереженням Jina перевіряє, чи можна лот моніторити автоматично.</p>
+    <div class="grid g2"><div class="field"><label>Інвестиція</label><select id="ml_i">${Object.keys(INV).map(i=>`<option value="${i}" ${f.inv===i?'selected':''}>${esc(INV[i].n)}</option>`).join('')}</select></div>
+    <div class="field"><label>Номер лоту</label><input type="text" id="ml_n" value="${esc(f.no)}" placeholder="напр. B.4.2"></div>
+    <div class="field"><label>Кімнат</label><input type="number" id="ml_r" value="${f.rooms}"></div><div class="field"><label>Площа, м²</label><input type="number" id="ml_a" value="${f.area}"></div>
+    <div class="field"><label>Ціна, zł</label><input type="number" id="ml_p" value="${f.price}"></div></div>
+    <div class="field"><label>Посилання на лот або сторінку, де його видно (обов’язково)</label><input type="text" id="ml_u" data-c="mlurl" value="${esc(f.url)}" ${chk==='run'?'disabled':''}><span class="small muted">Приклад умовний. Для демо: посилання з otodom, olx або morizon Jina не зможе моніторити (захист від ботів).</span></div>
+    ${chk==='run'?`<div class="row"><span class="spin"></span><span>Jina читає сторінку й шукає статус та ціну лота…</span></div>`:''}
+    ${chk==='ok'?`<div class="note"><b>Моніторити автоматично можна.</b> На сторінці знайдено лот ${esc(f.no||'—')}: статус «Wolne» і ціну ${zl(f.price)}, що збігається з введеним. Лот перевірятиметься двічі на день разом з іншими джерелами.</div>`:''}
+    ${chk==='fail'?`<div class="note warn"><b>Автоматично стежити не вдалося.</b> Сторінка віддала 403 (захист від ботів), статус і ціну прочитати неможливо. Змініть посилання на сторінку забудовника або збережіть лот з ручним контролем: система нагадуватиме перевіряти його вручну кожні 3 дні, а в списку він матиме позначку «без автоперевірки».</div>`:''}
+    <div class="row">${chk==='ok'?`<button class="btn pri" data-a="lotSave" data-v="auto">Зберегти з автомоніторингом</button>`:''}${chk==='fail'?`<button class="btn" data-a="lotSave" data-v="manual">Зберегти з ручним контролем</button>`:''}${chk==='run'?'':`<button class="btn ${chk?'':'pri'}" data-a="lotCheck">${chk?'Перевірити ще раз':'Перевірити через Jina'}</button>`}</div>`;
+  }
+  if(m.id==='newRem') h=`<div class="row" style="justify-content:space-between"><h2>Нове нагадування</h2>${close}</div><div class="field"><label>Що зробити</label><input type="text" id="r_t" placeholder="Передзвонити…"></div><div class="grid g2"><div class="field"><label>Клієнт</label><select id="r_c">${vis().map(c=>`<option value="${c.id}">${esc(c.name)}</option>`)}</select></div><div class="field"><label>Коли</label><input type="date" id="r_d" value="2026-10-16"></div></div><button class="btn pri" data-a="saveRem">Створити</button>`;
+  if(m.id==='addLink') h=`<div class="row" style="justify-content:space-between"><h2>Додати оголошення вторинки</h2>${close}</div><div class="field"><label>Посилання (Otodom, OLX, Morizon)</label><input type="text" id="l_u" value="otodom.pl/pl/oferta/3-pokojowe-mieszkanie-61m2-ID4kLm9"></div><div class="field"><label>Для клієнта</label><select id="l_c">${vis().map(c=>`<option value="${c.id}">${esc(c.name)}</option>`)}</select></div>${m.step?`<div class="note">Jina прочитала оголошення: <b>3 кімн., 61 м², Wrocław Psie Pole, 698 000 zł</b>. Перевірте поля й підтвердіть.</div><button class="btn pri" data-a="saveLink">Підтвердити і стежити щодня</button>`:`<button class="btn pri" data-a="readLink">Прочитати через Jina</button>`}`;
+  if(m.id==='handover') h=handoverModal(m,close);
+  if(m.id==='import') {w='wide';h=importModal(m,close)}
+  if(m.id==='addSource') {w='wide';h=addSourceModal(m,close)}
+  return `<div class="overlay" data-a="overlay"><div class="modal ${w}" role="dialog" aria-modal="true">${h}</div></div>`;
+}
+function sendModal(m,close){
+  const c=C(S.cid), ds=propsOf(c.id).filter(p=>p.delivery==='draft');
+  if(m.stage==='check') return `<div class="row" style="justify-content:space-between"><h2>Перевірка свіжості перед надсиланням</h2>${close}</div><p class="small muted" style="margin:0">Система повторно зчитує сторінки джерел вибраних лотів. Так клієнт не отримає лот, який вже зарезервовано.</p><div class="list">${ds.map(p=>`<div class="item"><span>${esc(lotName(Ls(p.lid)))}</span><span class="spin"></span></div>`).join('')}</div>`;
+  const okp=ds.filter(p=>!unavailable(Ls(p.lid))), bad=ds.filter(p=>unavailable(Ls(p.lid)));
+  const txt=(c.lang==='pl'?`Dzień dobry ${c.name.split(' ')[0]}, przygotowałam dla Ciebie propozycje: https://kabinet.example/s/…`:`Добрий день, ${c.name.split(' ')[0]}! Підібрала для вас варіанти: https://kabinet.example/s/…`);
+  return `<div class="row" style="justify-content:space-between"><h2>Надіслати підбірку</h2>${close}</div>
+  <div class="list">${ds.map(p=>{const l=Ls(p.lid);return `<div class="item"><span>${esc(lotName(l))}</span>${unavailable(l)?'<span class="pill bad">змінився статус, виключено</span>':'<span class="pill ok">актуально · перевірено щойно</span>'}</div>`}).join('')}</div>
+  ${bad.length?`<div class="note warn">${bad.length} лот(и) виключено з відправки: статус змінився за час, що минув з останнього прогону.</div>`:''}
+  <div class="field"><label>Текст повідомлення (мовою клієнта)</label><textarea id="s_txt">${esc(txt)}</textarea></div>
+  <div class="row"><button class="btn" data-a="chan" data-v="WhatsApp">WhatsApp</button><button class="btn" data-a="chan" data-v="Viber">Viber · скопіювати текст</button><button class="btn" data-a="chan" data-v="Telegram">Telegram · скопіювати текст</button></div>
+  <p class="small muted" style="margin:0">Відкрийте чат у месенджері, надішліть повідомлення, потім підтвердіть тут. Лише після підтвердження статус стає «Надіслано».</p>
+  <button class="btn pri" ${okp.length?'':'disabled'} data-a="confirmSent">Підтверджую: надіслано (${okp.length})</button>`;
+}
+function handoverModal(m,close){
+  const u=U(m.u), cl=S.clients.filter(c=>c.u===u.id), others=S.users.filter(x=>x.role==='realtor'&&x.active&&x.id!==u.id);
+  if(m.done) return `<div class="row" style="justify-content:space-between"><h2>Готово</h2>${close}</div><div class="note">${esc(u.name)}: акаунт заблоковано, ${cl.length||m.n} клієнтів, нагадування й покази передано. Історія листування збережена.</div>`;
+  return `<div class="row" style="justify-content:space-between"><h2>Передати клієнтів: ${esc(u.name)}</h2>${close}</div>
+  <div class="list small"><div class="item"><span>Клієнтів</span><b>${cl.length}</b></div><div class="item"><span>Відкритих нагадувань</span><b>${S.rems.filter(r=>r.u===u.id&&!r.done).length}</b></div><div class="item"><span>Запланованих показів</span><b>${S.views.filter(v=>v.u===u.id).length}</b></div></div>
+  <div class="field"><label>Хто отримає</label><select id="h_to">${others.map(o=>`<option value="${o.id}">${esc(o.name)}</option>`)}</select></div>
+  <label class="row small"><input type="checkbox" id="h_block" checked> Заблокувати акаунт (вхід буде відхилено вже на наступному запиті)</label>
+  <p class="small muted" style="margin:0">Операція ідемпотентна: якщо збій перерве передачу, її можна продовжити.</p>
+  <button class="btn pri" data-a="doHandover" data-u="${u.id}">Передати</button>`;
+}
+function importModal(m,close){
+  const st=m.step||1;
+  let b='';
+  if(st===1) b=`<p class="muted">Підтримуються .xlsx і .csv. У прототипі файл умовний.</p><button class="btn pri" data-a="impStep" data-v="2">Обрати файл klienci_2025.xlsx (148 рядків)</button>`;
+  if(st===2) b=`<p class="small muted" style="margin:0">Система вгадала відповідність колонок. Перевірте.</p><div class="grid g2">${[['Imię i nazwisko','Імʼя'],['Telefon','Телефон'],['Budżet','Бюджет'],['Źródło','Джерело ліда'],['Uwagi','Нотатка']].map(x=>`<div class="field"><label>Колонка Excel: <b>${x[0]}</b></label><select><option>${x[1]}</option><option>— пропустити —</option></select></div>`).join('')}</div><button class="btn pri" data-a="impStep" data-v="3">Далі: прев’ю</button>`;
+  if(st===3) b=`<div class="grid g3"><div class="card flat"><div class="kpi"><b style="color:var(--ok)">131</b><span>будуть створені</span></div></div><div class="card flat"><div class="kpi"><b style="color:var(--bad)">4</b><span>конфлікти (телефон уже в інших ріелторів)</span></div></div><div class="card flat"><div class="kpi"><b style="color:var(--warn)">9</b><span>телефон не розібрано</span></div></div></div>
+  <div class="scroll"><table class="tbl"><thead><tr><th>Рядок</th><th>Імʼя</th><th>Телефон з файлу</th><th>Результат</th></tr></thead><tbody><tr><td>12</td><td>Ewa Nowicka</td><td class="mono">501 223 340</td><td><span class="pill ok">+48 501 223 340</span></td></tr><tr><td>27</td><td>Anna Melnyk</td><td class="mono">+48501234567</td><td><span class="pill bad">конфлікт: клієнт Marta Kowalska</span></td></tr><tr><td>31</td><td>Dmytro P.</td><td class="mono">067 912 ?? 11</td><td><span class="pill warn">перевірити вручну</span></td></tr><tr><td>44</td><td>Paweł Dąbrowski</td><td class="mono">608 144 019</td><td><span class="pill ok">+48 608 144 019</span></td></tr></tbody></table></div><button class="btn pri" data-a="doImport">Імпортувати 131, конфлікти залишити мені</button>`;
+  return `<div class="row" style="justify-content:space-between"><h2>Імпорт клієнтів · крок ${st} з 3</h2>${close}</div>${b}`;
+}
+function addSourceModal(m,close){
+  const st=m.step||1;
+  let b='';
+  const dv=m.dev||'ataner';
+  if(st===1) b=`<div class="grid g2"><div class="field"><label>Забудовник</label><select id="as_d" data-c="asdev">${Object.keys(DEV).filter(k=>k!=='agg').map(k=>`<option value="${k}" ${dv===k?'selected':''}>${esc(DEV[k].n)}</option>`).join('')}<option value="new" ${dv==='new'?'selected':''}>+ Новий забудовник…</option></select></div>${dv==='new'?`<div class="field"><label>Назва нового забудовника</label><input type="text" id="as_dn" value="${esc(m.devName||'Deweloper Zielony')}"></div>`:'<div></div>'}<div class="field"><label>Інвестиція</label><input type="text" id="as_n" value="${esc(m.name||'Osiedle Zielone')}"></div><div class="field"><label>Посилання, звідки брати квартири</label><input type="text" id="as_u" value="${esc(m.url||'https://developer.example.pl/oferta/osiedle-zielone/mieszkania')}"></div></div><p class="small muted" style="margin:0">Лоти потраплять у розділ «Лоти» під цим забудовником. Одне посилання на сторінку зі списком; для іншої інвестиції цього ж забудовника додайте ще одне. Адреса в прикладі умовна.</p><button class="btn pri" data-a="asStep" data-v="2">Спарсити через Jina</button>`;
+  if(st===2) b=`<div class="row"><span class="spin"></span><span>Jina забирає сторінку й зберігає знімок… потім AI шукає якорі.</span></div>`;
+  if(st===3) b=`<div class="note">Знімок 148 КБ збережено. На сторінці знайдено <b>38 лотів</b> та лічильник «Znaleziono 38».</div>
+  <h3>AI знайшов якорі</h3><div class="scroll"><table class="tbl"><thead><tr><th>Поле</th><th>Селектор</th><th>Приклад</th><th></th></tr></thead><tbody>${[['Рядок лоту','.offer-card','38 елементів','ok'],['Номер лоту','.offer-card h3','Mieszkanie A.3.1','ok'],['Статус','.offer-card .status','Wolne','ok'],['Ціна','.offer-card .price strong','894 600 zł','ok'],['Площа','.offer-card [data-area]','71,00 m²','ok'],['Лічильник','.results-count','Znaleziono 38','ok']].map(r=>`<tr><td>${r[0]}</td><td class="mono small">${r[1]}</td><td class="small">${r[2]}</td><td><span class="pill ok">знайдено</span></td></tr>`).join('')}</tbody></table></div>
+  <h3 style="margin-top:6px">Словник статусів</h3><div class="grid g3">${[['Wolne','available'],['Rezerwacja','reserved'],['Ostatnie sztuki','?']].map(x=>`<div class="field"><label>«${x[0]}»</label>${x[1]==='?'?`<select id="as_map"><option value="">— оберіть вручну —</option><option>available</option><option>reserved</option><option>sold</option></select><span class="small" style="color:var(--bad)">нове слово: автоматично не мапиться</span>`:`<input type="text" value="${x[1]}" readonly>`}</div>`).join('')}</div>
+  <button class="btn pri" data-a="asStep" data-v="4">Далі: прев’ю і перевірка</button>`;
+  if(st===4) b=`<div class="note">Незалежна перевірка вибірки: AI прочитав знімок і звірив <b>8 з 8</b> випадкових лотів (статус і ціна збіглись із розбором).</div><div class="scroll"><table class="tbl"><thead><tr><th>Лот</th><th>Кімн.</th><th>Площа</th><th>Ціна</th><th>Статус</th></tr></thead><tbody>${[['Z.1.01',2,'41,2','563 000 zł','Wolne'],['Z.1.02',3,'58,9','801 000 zł','Rezerwacja'],['Z.2.04',2,'43,0','589 000 zł','Wolne'],['Z.2.09',4,'77,5','1 044 000 zł','Wolne'],['Z.3.01',3,'60,3','829 000 zł','Wolne']].map(r=>`<tr>${r.map(x=>`<td>${x}</td>`).join('')}</tr>`).join('')}</tbody></table></div><p class="small muted" style="margin:0">Показано 5 з 38. Зберігаємо конфіг v1 і знімок як еталон: кожна наступна версія парсера мусить відтворити цей результат.</p><button class="btn pri" data-a="saveSource">Зберегти джерело</button>`;
+  return `<div class="row" style="justify-content:space-between"><h2>Додати джерело · крок ${Math.min(st,4)} з 4</h2>${close}</div>${b}`;
+}
+
+/* ============ РЕНДЕР ============ */
+function render(){
+  if(!PAGES[S.page]||!PAGES[S.page].includes(S.role)) S.page=S.role==='admin'?'sources':'dashboard';
+  const bad=alerts().length, nav=GROUPS.map(g=>{
+    const items=g[1].filter(p=>PAGES[p].includes(S.role)); if(!items.length) return '';
+    return `<div class="sec">${t(g[0])}</div>`+items.map(p=>`<button class="${S.page===p?'on':''}" data-a="go" data-id="${p}"><span>${t(p)}</span>${p==='dashboard'&&bad?`<span class="cnt">${bad}</span>`:p==='sources'&&S.sources.some(s=>s.state==='needs_review')?'<span class="cnt">!</span>':''}</button>`).join('');
+  }).join('');
+  let page='';
+  if(S.page==='dashboard') page=pDashboard(); if(S.page==='clients') page=S.cid?pClient():pClients(); if(S.page==='listings') page=pListings();
+  if(S.page==='viewings') page=pViewings(); if(S.page==='reminders') page=pReminders(); if(S.page==='secondary') page=pSecondary();
+  if(S.page==='team') page=pTeam(); if(S.page==='sources') page=pSources(); if(S.page==='deals') page=pDeals(); if(S.page==='import') page=pImport(); if(S.page==='users') page=pUsers();
+  const keep=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.s;
+  $('#app').innerHTML=`<div class="shell"><aside class="side"><div class="brand"><div class="logo">K</div><b>Кабінет ріелтора</b></div>
+   <div class="who"><label for="roleSel">Дивитись як</label><select id="roleSel" data-c="role"><option value="realtor" ${S.role==='realtor'?'selected':''}>Ріелтор · Marta Kowalska</option><option value="owner" ${S.role==='owner'?'selected':''}>Власник · Andrzej Nowak</option><option value="admin" ${S.role==='admin'?'selected':''}>Технічний admin</option></select>
+   <label for="langSel">Мова інтерфейсу</label><select id="langSel" data-c="lang"><option value="uk" ${S.lang==='uk'?'selected':''}>Українська</option><option value="pl" ${S.lang==='pl'?'selected':''}>Polski</option><option value="ru" ${S.lang==='ru'?'selected':''}>Русский</option></select></div>
+   <nav class="nav">${nav}</nav>
+   <div class="demo"><div class="small muted"><b>Демо-сценарії</b><br>Що відбувається, коли світ змінюється</div>
+    <button class="btn sm" data-a="demo" data-id="reserve">Лот A.4.3 зарезервували</button><button class="btn sm" data-a="demo" data-id="newlot">З’явився новий лот A.9.1</button><button class="btn sm" data-a="demo" data-id="break">Сайт Naturama змінив верстку</button><button class="btn sm" data-a="demo" data-id="reset">Скинути все</button></div>
+   <div class="sticky-note">Прототип: дані умовні, нічого не зберігається. Лоти Świerzawska 13 взято зі зразка сторінки Ataner.</div></aside>
+   <main class="main">${page}</main></div>${modalView()}${S.toast?`<div class="toast">${esc(S.toast)}</div>`:''}`;
+  if(keep){const e=document.querySelector(`[data-s="${keep}"]`);if(e){e.focus();const v=e.value;e.value='';e.value=v}}
+}
+const $=s=>document.querySelector(s);
+
+/* ============ ДІЇ ============ */
+function openClient(id,tab){S.page='clients';S.cid=id;S.tab=tab||'overview';S.modal=null}
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-a]'); if(!el) return;
+  const a=el.dataset.a,id=el.dataset.id,v=el.dataset.v;
+  if(a==='overlay'){if(e.target===el)S.modal=null;else return}
+  else if(a==='go'){S.page=id;S.cid=null;S.sel=null;S.modal=null}
+  else if(a==='openClient')openClient(id,el.dataset.tab);
+  else if(a==='tab')S.tab=id;
+  else if(a==='fstage')S.fstage=id;
+  else if(a==='lav')S.lav=id;
+  else if(a==='clearDist')S.ldist=[];
+  else if(a==='toggleDev')S.open[id]=!S.open[id];
+  else if(a==='toggleAll'){const ks=Object.keys(DEV).concat('_manual'),all=ks.every(k=>S.open[k]);ks.forEach(k=>S.open[k]=!all)}
+  else if(a==='widen'){const c=C(id),cr=c.crit;
+    if(v==='бюджет')cr.budget=Math.round(cr.budget*1.1/10000)*10000;
+    if(v==='район')cr.dists=[];
+    if(v==='кімнати'){const mn=Math.min(...cr.rooms),mx=Math.max(...cr.rooms);cr.rooms=[...new Set([...cr.rooms,mn-1,mx+1].filter(n=>n>=1&&n<=5))].sort()}
+    if(v==='площа')cr.minArea=Math.max(20,cr.minArea-5);
+    if(v==='місто')cr.cities=['Wrocław','Poznań'];
+    act(id,'note','Пошук розширено: '+WIDEN[v]);toast('Пошук розширено: '+WIDEN[v])}
+  else if(a==='allDist'){const c=C(id);c.crit.dists=distsOf(c.crit.cities)}
+  else if(a==='noDist'){C(id).crit.dists=[]}
+  else if(a==='modal')S.modal={id,u:el.dataset.u,dev:el.dataset.dev,stage:id==='send'?'check':undefined};
+  else if(a==='closeModal')S.modal=null;
+  else if(a==='toast'){toast(id);return}
+  else if(a==='initCrit'){C(id).crit={budget:700000,rooms:[2,3],minArea:40,cities:['Wrocław'],dists:[],floorMin:1,by:202612,finish:'any'}}
+  else if(a==='addProp'){const c=C(S.cid);S.props.push({id:'p'+Date.now(),cid:c.id,lid:id,delivery:'draft',reaction:'none',reason:'',outcome:'none',slot:null,offered:false});toast('Додано в чернетку підбірки')}
+  else if(a==='merge'){S.mergedSuggest=true;Ls('ow2').prop='w2';toast('Об’єднано: тепер це один об’єкт із двома джерелами')}
+  else if(a==='remDone'){const r=S.rems.find(x=>x.id===id);r.done=true;r.h.push(['15.10 10:3'+Math.floor(Math.random()*9),'Виконано'])}
+  else if(a==='remSnooze'){const r=S.rems.find(x=>x.id===id);r.due='2026-10-16T09:00';r.h.push(['15.10 10:3'+Math.floor(Math.random()*9),'Відкладено на 16.10'])}
+  else if(a==='saveRem'){const t=$('#r_t').value.trim()||'Нагадування';S.rems.push({id:'r'+Date.now(),cid:$('#r_c').value,u:me().id,title:t,due:$('#r_d').value+'T09:00',kind:'manual',rule:'',done:false,h:[['15.10 10:30','Створено: '+me().name]]});S.modal=null;toast('Нагадування створено')}
+  else if(a==='saveNote'){act(S.cid,$('#n_k').value,$('#n_x').value.trim()||'(без тексту)');S.modal=null;toast('Записано в історію')}
+  else if(a==='createClient'){const n=$('#nc_name').value.trim()||'Новий клієнт';S.clients.unshift({id:'c'+Date.now(),name:n,phone:S.modal.phone||'+48 …',u:me().id===('u0')?'u1':me().id,stage:'matching',lead:$('#nc_lead').value,fin:$('#nc_fin').value,consent:$('#nc_cons').checked?'15.10.2026 · внесено ріелтором':'—',lang:'uk',last:0,next:'Уточнити бюджет і район',crit:null});S.modal=null;toast('Клієнта створено')}
+  else if(a==='dupAsk'){notify('owner','Запит: ріелтор спробував створити клієнта з уже наявним телефоном '+S.modal.phone,'bad');S.modal=null;toast('Запит власнику надіслано')}
+  else if(a==='chan'){if(v!=='WhatsApp'){try{navigator.clipboard.writeText($('#s_txt').value).then(()=>toast('Текст скопійовано. Відкрийте чат у '+v),()=>toast('Виділіть і скопіюйте текст вручну'))}catch(x){toast('Виділіть і скопіюйте текст вручну')}}else toast('WhatsApp: відкрито чат із готовим текстом (посилання wa.me)');return}
+  else if(a==='confirmSent'){const c=C(S.cid);let n=0;propsOf(c.id).forEach(p=>{if(p.delivery==='draft'){if(unavailable(Ls(p.lid))){S.props.splice(S.props.indexOf(p),1)}else{p.delivery='sent';n++}}});act(c.id,'msg_out','Надіслано підбірку з '+n+' варіантів');S.modal=null;S.tab='proposals';toast('Позначено надісланим. Таймер 48 год піде після відкриття клієнтом')}
+  else if(a==='offerSlots'){const p=S.props.find(x=>x.id===id);p.offered=true;act(p.cid,'msg_out','Запропоновано слоти для показу');toast('Слоти додано до сторінки клієнта')}
+  else if(a==='quick'){const p=S.props.find(x=>x.id===id);p.reaction=v;act(p.cid,'react','Відповідь у чаті: '+(v==='liked'?'підходить':'не підходить')+' · '+lotName(Ls(p.lid)))}
+  else if(a==='react'){const p=S.props.find(x=>x.id===id);p.reaction=v;p.delivery='opened';const c=C(p.cid);if(v==='wants_viewing')p.offered=true;act(c.id,'react','Клієнт на сторінці: '+{liked:'👍',disliked:'👎',wants_viewing:'хоче показ'}[v]+' · '+lotName(Ls(p.lid)));notify(c.u,c.name+': '+{liked:'👍',disliked:'👎',wants_viewing:'хоче показ'}[v]+' · '+lotName(Ls(p.lid)),'ok')}
+  else if(a==='pickSlot'){const p=S.props.find(x=>x.id===id);p.slot=v;p.outcome='viewing';const c=C(p.cid);S.views.push({id:'v'+Date.now(),cid:c.id,lid:p.lid,at:v,st:'підтверджено',u:c.u});act(c.id,'react','Клієнт обрав слот: '+fmtAt(v));notify(c.u,c.name+' обрав час показу: '+fmtAt(v),'ok');S.rems.push({id:'r'+Date.now(),cid:c.id,u:c.u,title:'Показ '+lotName(Ls(p.lid))+' '+fmtAt(v),due:v,kind:'auto',rule:'показ завтра',done:false,h:[['15.10 10:3'+Math.floor(Math.random()*9),'Створено автоматично']]})}
+  else if(a==='selSource'){S.sel=id||null}
+  else if(a==='repairOk'){const s=SR(S.repair.sid);s.state='ok';s.v++;s.last=1;S.listings.filter(l=>l.src===s.id).forEach(l=>l.ver=1);S.repair=null;toast('Кандидата застосовано, джерело працює. Є відкат до попередньої версії')}
+  else if(a==='repairNo'){SR(S.repair.sid).state='paused';S.repair=null;toast('Кандидата відхилено, джерело на паузі')}
+  else if(a==='repairRetry'){S.repair.attempt=Math.min(3,S.repair.attempt+1);toast('AI формує нового кандидата (спроба '+S.repair.attempt+' з 3)')}
+  else if(a==='doHandover'){const to=$('#h_to').value,uid=el.dataset.u;const n=S.clients.filter(c=>c.u===uid).length;S.clients.forEach(c=>{if(c.u===uid)c.u=to});S.rems.forEach(r=>{if(r.u===uid)r.u=to});S.views.forEach(x=>{if(x.u===uid)x.u=to});if($('#h_block').checked)U(uid).active=false;S.modal={id:'handover',u:uid,done:true,n}}
+  else if(a==='impStep')S.modal.step=+v;
+  else if(a==='doImport'){S.importDone=true;S.clients.push({id:'ci1',name:'Ewa Nowicka',phone:'+48 501 223 340',u:'u2',stage:'matching',lead:'Імпорт',fin:'Не з’ясовано',consent:'— (імпорт, потрібне підтвердження)',lang:'pl',last:0,next:'Підтвердити згоду RODO',crit:null},{id:'ci2',name:'Paweł Dąbrowski',phone:'+48 608 144 019',u:'u2',stage:'matching',lead:'Імпорт',fin:'Не з’ясовано',consent:'—',lang:'pl',last:0,next:'Підтвердити згоду RODO',crit:null},{id:'ci3',name:'Joanna Mazur',phone:'+48 511 009 233',u:'u3',stage:'matching',lead:'Імпорт',fin:'Не з’ясовано',consent:'—',lang:'pl',last:0,next:'Підтвердити згоду RODO',crit:null});S.modal=null;toast('Імпортовано. Конфлікти чекають вашого рішення')}
+  else if(a==='importRollback'){S.clients=S.clients.filter(c=>!c.id.startsWith('ci'));S.importDone=false;toast('Імпорт відкочено: прибрано лише створені й не змінені записи')}
+  else if(a==='readLink'){S.modal.step=1}
+  else if(a==='saveLink'){S.secondary.unshift({id:'t'+Date.now(),url:$('#l_u').value,title:'3 кімн., 61 м², Wrocław Psie Pole',price:698000,st:'active',chk:'щойно',cid:$('#l_c').value});S.modal=null;toast('Додано. Перевірка щодня о 06:00')}
+  else if(a==='asStep'){const n=+v;S.modal.step=n;if(n===2)setTimeout(()=>{if(S.modal&&S.modal.id==='addSource'){S.modal.step=3;render()}},1500);S.modal.name=($('#as_n')||{}).value||S.modal.name;S.modal.url=($('#as_u')||{}).value||S.modal.url;S.modal.devName=($('#as_dn')||{}).value||S.modal.devName;S.modal.dev=($('#as_d')||{}).value||S.modal.dev}
+  else if(a==='saveSource'){const nm=S.modal.name||'Osiedle Zielone';let dk=S.modal.dev||'ataner';if(dk==='new'){dk='dev'+Date.now();DEV[dk]={n:S.modal.devName||'Deweloper Zielony',partner:false,pct:0}}const ik='inv'+Date.now();INV[ik]={n:nm,dist:'Інший',dev:dk,city:'Poznań',kind:'Новобудова'};S.sources.push({id:'s'+Date.now(),inv:ik,type:'developer_site',url:(S.modal.url||'developer.example.pl/oferta/osiedle-zielone').replace(/^https?:\/\//,''),trust:'висока',state:'ok',last:1,v:1,runs:[38]});S.modal=null;toast('Джерело додано. Перший прогін не створює сповіщень')}
+  else if(a==='lotCheck'){
+    const f={inv:$('#ml_i').value,no:$('#ml_n').value.trim(),rooms:+$('#ml_r').value||2,area:+$('#ml_a').value||40,price:+$('#ml_p').value||0,url:$('#ml_u').value.trim()};
+    S.modal.f=f;
+    if(!/^(https?:\/\/)?[\w-]+(\.[\w-]+)+(\/\S*)?$/i.test(f.url)){toast('Вкажіть посилання на лот: без нього лот додати не можна');return}
+    S.modal.chk='run';
+    setTimeout(()=>{if(S.modal&&S.modal.id==='manualLot'&&S.modal.chk==='run'){S.modal.chk=/otodom|olx|morizon|gratka|facebook/i.test(f.url)?'fail':'ok';render()}},1500)}
+  else if(a==='lotSave'){
+    const f=S.modal.f;
+    if(!SR('sm'))S.sources.push({id:'sm',inv:f.inv,type:'tracked_link',url:'окремі посилання на лоти',trust:'середня',state:'ok',last:1,v:1,runs:[1]});
+    const id2='m'+Date.now();
+    S.listings.push({id:id2,inv:f.inv,no:f.no||'—',rooms:f.rooms,area:f.area,floor:1,price:f.price,av:'available',pr:'present',bal:true,src:'sm',prop:id2,ver:1,done:'12.2026',fin:'pod klucz',missing:0,manual:{url:f.url,mode:v}});
+    if(v==='manual')S.rems.push({id:'r'+Date.now(),cid:null,u:me().id,title:'Перевірити вручну лот '+(f.no||'—')+' ('+INV[f.inv].n+')',due:'2026-10-18T10:00',kind:'auto',rule:'ручний лот без автомоніторингу',done:false,h:[['15.10 10:3'+Math.floor(Math.random()*9),'Створено автоматично, повтор кожні 3 дні']]});
+    S.modal=null;toast(v==='auto'?'Лот додано. За ним стежитимемо автоматично':'Лот додано з ручним контролем. Нагадування створено')}
+  else if(a==='demo')demo(id);
+  else if(a==='dupAsk')S.modal=null;
+  else return;
+  if(a==='modal'&&id==='send')setTimeout(()=>{if(S.modal&&S.modal.id==='send'&&S.modal.stage==='check'){S.listings.filter(l=>propsOf(S.cid).some(p=>p.delivery==='draft'&&p.lid===l.id)).forEach(l=>{if(!unavailable(l))l.ver=1});S.modal.stage='ready';render()}},1400);
+  render();
+});
+document.addEventListener('change',e=>{
+  const el=e.target.closest('[data-c]'); if(!el) return; const k=el.dataset.c,id=el.dataset.id;
+  if(k==='role'){S.role=el.value;S.cid=null;S.sel=null;S.modal=null;S.page=S.role==='admin'?'sources':'dashboard'}
+  else if(k==='lang')S.lang=el.value;
+  else if(k==='asdev'){S.modal.name=$('#as_n').value;S.modal.url=$('#as_u').value;S.modal.dev=el.value}
+  else if(k==='linv')S.linv=el.value;
+  else if(k==='stage'){const c=C(id);if(el.value==='closed'&&showUtil(c)&&utilDone(c)<5){toast('Не можна завершити: підключено '+utilDone(c)+' з 5 комунікацій')}else{c.stage=el.value;act(id,'stage','Етап змінено на «'+stageName(el.value)+'»')}}
+  else if(k==='util'){const c=C(id);utilsOf(c)[el.dataset.k]=el.value;act(id,'note','Комунікації: '+UT.find(u=>u[0]===el.dataset.k)[1]+' → '+UST.find(s=>s[0]===el.value)[1])}
+  else if(k==='cr'){const c=C(id),kk=el.dataset.k;if(kk==='cities'){c.crit.cities=el.value==='both'?['Wrocław','Poznań']:[el.value];c.crit.dists=(c.crit.dists||[]).filter(d=>distsOf(c.crit.cities).includes(d))}else if(['budget','minArea','floorMin','by'].includes(kk))c.crit[kk]=+el.value;else c.crit[kk]=el.value}
+  else if(k==='room'){const c=C(id),n=+el.dataset.n,r=c.crit.rooms;if(el.checked&&!r.includes(n))r.push(n);if(!el.checked)c.crit.rooms=r.filter(x=>x!==n)}
+  else if(k==='ldist'){const n=el.dataset.n;S.ldist=el.checked?[...S.ldist,n]:S.ldist.filter(x=>x!==n)}
+  else if(k==='dist'){const c=C(id),n=el.dataset.n,d=c.crit.dists||(c.crit.dists=[]);c.crit.dists=el.checked?[...d,n]:d.filter(x=>x!==n)}
+  else if(k==='mlurl'){S.modal.chk=undefined;S.modal.f={inv:$('#ml_i').value,no:$('#ml_n').value,rooms:+$('#ml_r').value||2,area:+$('#ml_a').value||40,price:+$('#ml_p').value||0,url:el.value.trim()}}
+  else if(k==='reason'){S.props.find(p=>p.id===id).reason=el.value}
+  else if(k==='ncphone'){S.modal.phone=el.value;S.modal.name=$('#nc_name').value}
+  render();
+});
+document.addEventListener('input',e=>{const el=e.target.closest('[data-s]');if(!el)return;S[el.dataset.s]=el.value;render()});
+
+function demo(id){
+  if(id==='reset'){location.reload();return}
+  if(id==='reserve'){
+    const l=Ls('a3975');l.av='reserved';l.ver=1;
+    notify('u1','Лот A.4.3 (Świerzawska 13) змінив статус: Wolne → Rezerwacja. Пропонувався: Anna Melnyk','bad');
+    act('c1','stage','Автоматично: лот A.4.3 став Rezerwacja, підбірка клієнта оновлена');
+    S.rems.push({id:'r'+Date.now(),cid:'c1',u:'u1',title:'Лот A.4.3 зарезервовано: запропонувати Anna Melnyk заміну',due:'2026-10-15T12:00',kind:'auto',rule:'змінився лот у підбірці',done:false,h:[['15.10 10:31','Створено автоматично']]});
+    S.page='dashboard';S.cid=null;toast('Прогін помітив резерв. Ріелтор отримав сповіщення (в застосунку й у Telegram)');
+  }
+  if(id==='newlot'){
+    if(!Ls('a4200'))S.listings.push({id:'a4200',inv:'sw13',no:'A.9.1',rooms:2,area:44.9,floor:9,price:639000,av:'available',pr:'present',bal:true,src:'s1',prop:'a4200',ver:1,done:'06.2026',fin:'pod klucz',missing:0});
+    notify('u1','Нові збіги після прогону: A.9.1 (Świerzawska 13, 639 000 zł) підходить Anna Melnyk (бал '+score(C('c1'),Ls('a4200')).total+') та Jan Kaczmarek','info');
+    S.page='dashboard';S.cid=null;toast('З’явився новий лот. Збіги прийшли одним дайджестом, не по повідомленню на лот');
+  }
+  if(id==='break'){
+    const s=SR('s4');s.state='needs_review';
+    S.repair={sid:'s4',attempt:1,reason:'Лічильник сайту «Znaleziono 61», розібрано 0 лотів. Змінилась розмітка рядка лоту.',old:'.offer-row .status',cand:'.js-estate-card [data-status]',
+      gates:[['а. Регресія на старій фікстурі','Кандидат відтворює очікуваний результат на збереженому знімку (59 з 59 лотів)','ok'],['б. Валідатор на свіжому знімку','Розібрано 61 з 61, пагінацію пройдено, поля заповнені','ok'],['в. Безперервність','97% лотів збігаються за external_id з останнім добрим прогоном, нових слів статусу немає','ok'],['г. Незалежна AI-перевірка вибірки','8 з 8 випадкових лотів збіглись зі знімком','ok'],['д. Різниця з останнім прогоном','3 лоти змінили статус, 2 нові: у межах порогу, але вперше після зміни розмітки','warn']],
+      diff:[['N2.A.12','Wolne','Wolne'],['N2.B.03','Wolne','Rezerwacja'],['N2.C.08','Rezerwacja','Rezerwacja'],['N2.D.01 (новий)','—','Wolne'],['N2.A.07','Wolne','Rezerwacja']]};
+    S.sources.forEach(()=>{});
+    notify('owner','Джерело Naturama II потребує перегляду: парсер перестав розбирати лоти. Статуси заморожено.','bad');
+    S.role=S.role==='realtor'?'owner':S.role;S.page='sources';S.sel='s4';S.cid=null;toast('Джерело в «needs_review». Лоти не позначено проданими, AI підготував кандидата');
+  }
+}
+
+/* ============ СТАРТ ============ */
+render();
+</script>
